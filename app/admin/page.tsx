@@ -2,6 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { api } from "@/components/pilot-context";
+import { Alert } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Table, TableCell, TableRow } from "@/components/ui/table";
 
 type Row = {
   id: string;
@@ -74,15 +81,19 @@ export default function AdminPage() {
 
   if (!authed) {
     return (
-      <div className="page">
-        <div className="card">
-          <h1>Founder view</h1>
-          <p className="mute">Approval queue, credentials, and feedback. Students never see this page’s contents.</p>
-          <label htmlFor="password">Founder password</label>
-          <input id="password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} style={{ maxWidth: 320 }} />
-          <div className="err">{error}</div>
-          <button className="btn" type="button" onClick={login}>Open</button>
-        </div>
+      <div className="mx-auto max-w-md px-5 py-8">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-3xl font-extrabold">Founder view</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-muted-foreground">Approval queue, credentials, and feedback. Students never see this page’s contents.</p>
+            <Label htmlFor="password">Founder password</Label>
+            <Input id="password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
+            <p className="text-sm text-destructive">{error}</p>
+            <Button type="button" onClick={login}>Open</Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -91,99 +102,109 @@ export default function AdminPage() {
   const active = rows.filter((row) => row.status === "active").length;
 
   return (
-    <div className="page">
+    <div className="mx-auto max-w-5xl space-y-4 px-5 py-8">
       <h1>Founder view</h1>
-      <p className="mute">{rows.length} participants · {signed} waiting for approval · {active} signed in</p>
+      <p className="text-sm text-muted-foreground">{rows.length} participants · {signed} waiting for approval · {active} signed in</p>
       {delivery.email ? (
-        <p className="ok">Verification email is configured. Codes are emailed and are not shown on screen.</p>
+        <p className="font-semibold text-primary">Verification email is configured. Codes are emailed and are not shown on screen.</p>
       ) : (
-        <div className="banner">
+        <Alert className="border-dashed bg-secondary">
           Verification email is not set up yet. Add RESEND_API_KEY and PILOT_EMAIL_FROM, then restart the server.
-        </div>
+        </Alert>
       )}
-      {issued ? <p className="ok">{issued}</p> : null}
-      {error ? <p className="err">{error}</p> : null}
-      <div className="cards">
-        <article className="card">
-          <h2 style={{ marginTop: 0 }}>New invite</h2>
-          <label htmlFor="note">Note</label>
-          <input id="note" value={note} onChange={(event) => setNote(event.target.value)} placeholder="LUMS, batch A" />
-          <button className="btn" type="button" onClick={() => act("create-invite", undefined, { note })}>Create code</button>
-        </article>
-        <article className="card">
-          <h2 style={{ marginTop: 0 }}>Demo</h2>
-          <p className="mute">Resets SJ-DEMO / SJ-P-001 so you can walk the flow again.</p>
-          <button className="btn" type="button" onClick={() => act("reset-demo")}>Reset demo student</button>
-        </article>
-        <article className="card">
-          <h2 style={{ marginTop: 0 }}>Targets</h2>
-          <p className="mute">60% active every week. 70% complete the pulse. Most active students get a match. 40% or more say “very disappointed” if it went away. Top three fixes by week 3.</p>
-        </article>
+      {issued ? <p className="font-semibold text-primary">{issued}</p> : null}
+      {error ? <p className="text-sm text-destructive">{error}</p> : null}
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader><CardTitle>New invite</CardTitle></CardHeader>
+          <CardContent className="space-y-3">
+            <Label htmlFor="note">Note</Label>
+            <Input id="note" value={note} onChange={(event) => setNote(event.target.value)} placeholder="LUMS, batch A" />
+            <Button type="button" onClick={() => act("create-invite", undefined, { note })}>Create code</Button>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader><CardTitle>Demo</CardTitle></CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-muted-foreground">Resets SJ-DEMO / SJ-P-001 so you can walk the flow again.</p>
+            <Button type="button" onClick={() => act("reset-demo")}>Reset demo student</Button>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader><CardTitle>Targets</CardTitle></CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">60% active every week. 70% complete the pulse. Most active students get a match. 40% or more say “very disappointed” if it went away. Top three fixes by week 3.</p>
+          </CardContent>
+        </Card>
       </div>
 
       <h2>Invites</h2>
-      <div className="card">
-        <table>
+      <Card>
+        <Table>
           <tbody>
             {invites.map((invite) => (
-              <tr key={invite.code}>
-                <td><code>{invite.code}</code></td>
-                <td>{invite.participantId || "unused"}</td>
-                <td>{invite.note}</td>
-              </tr>
+              <TableRow key={invite.code}>
+                <TableCell><code>{invite.code}</code></TableCell>
+                <TableCell>{invite.participantId || "unused"}</TableCell>
+                <TableCell>{invite.note}</TableCell>
+              </TableRow>
             ))}
           </tbody>
-        </table>
-      </div>
+        </Table>
+      </Card>
 
       <h2>Participants</h2>
       {rows.map((row) => (
-        <article className="card" key={row.id} style={{ marginBottom: 12 }}>
-          <div className="row-actions">
-            <strong>{row.identity?.name || "Not signed"} · {row.id}</strong>
-            <span className="mute">{row.status} · {row.inviteCode}</span>
-          </div>
-          <p className="mute">
-            Pulses {row.pulses.length}/4 · Bugs {row.bugs.length} · Questionnaires {row.questionnaires.map((item) => `${item.mode}:${item.status}`).join(", ") || "none"}
-            {row.join ? ` · Join: ${row.join.interest}` : ""}
-          </p>
-          <div className="row-actions">
-            {row.status === "signed" ? <button className="btn" type="button" onClick={() => act("approve", row.id)}>Check details, countersign and approve</button> : null}
-            {row.status !== "revoked" && row.status !== "invited" ? <button className="btn alt" type="button" onClick={() => act("revoke", row.id)}>Revoke</button> : null}
-            <button className="btn alt" type="button" onClick={() => setOpen(open === row.id ? null : row.id)}>Details</button>
-          </div>
-          {open === row.id && row.identity ? (
-            <div className="box">
-              <p>CNIC: <b>{row.cnic}</b></p>
-              <p>{row.identity.uni} · {row.identity.sid} · {row.identity.dob}</p>
-              <p>{row.identity.mobile}<br />{row.identity.pemail}<br />{row.identity.uemail}</p>
-              {row.audit ? <p className="mute">Signed {row.audit.signedAt} from {row.audit.ip}. {row.audit.documentVersion}. Name mismatch: {row.audit.nameMismatch ? "yes" : "no"}.</p> : null}
-              {row.tempPassword ? <p>Temporary password: <span className="pw">{row.tempPassword}</span> {row.credentialsEmailed ? "(emailed)" : ""}</p> : null}
-              {row.pulses.map((pulse) => (
-                <p key={pulse.week}>Week {pulse.week}: {pulse.disappointed}. Fix first: {pulse.fixFirst}</p>
-              ))}
-              {row.bugs.map((bug) => (
-                <p key={bug.submittedAt}>Bug on {bug.screen}: {bug.actual}</p>
-              ))}
-              {row.join ? <p>Join note: {row.join.why} · {row.join.hours}</p> : null}
+        <Card key={row.id}>
+          <CardContent className="space-y-3 pt-6">
+            <div className="flex flex-wrap items-center gap-2">
+              <strong>{row.identity?.name || "Not signed"} · {row.id}</strong>
+              <Badge>{row.status} · {row.inviteCode}</Badge>
             </div>
-          ) : null}
-        </article>
+            <p className="text-sm text-muted-foreground">
+              Pulses {row.pulses.length}/4 · Bugs {row.bugs.length} · Questionnaires {row.questionnaires.map((item) => `${item.mode}:${item.status}`).join(", ") || "none"}
+              {row.join ? ` · Join: ${row.join.interest}` : ""}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {row.status === "signed" ? <Button type="button" onClick={() => act("approve", row.id)}>Check details, countersign and approve</Button> : null}
+              {row.status !== "revoked" && row.status !== "invited" ? <Button variant="outline" type="button" onClick={() => act("revoke", row.id)}>Revoke</Button> : null}
+              <Button variant="outline" type="button" onClick={() => setOpen(open === row.id ? null : row.id)}>Details</Button>
+            </div>
+            {open === row.id && row.identity ? (
+              <div className="space-y-2 rounded-2xl bg-secondary p-4 text-sm">
+                <p>CNIC: <b>{row.cnic}</b></p>
+                <p>{row.identity.uni} · {row.identity.sid} · {row.identity.dob}</p>
+                <p>{row.identity.mobile}<br />{row.identity.pemail}<br />{row.identity.uemail}</p>
+                {row.audit ? <p className="text-muted-foreground">Signed {row.audit.signedAt} from {row.audit.ip}. {row.audit.documentVersion}. Name mismatch: {row.audit.nameMismatch ? "yes" : "no"}.</p> : null}
+                {row.tempPassword ? <p>Temporary password: <code className="font-bold">{row.tempPassword}</code> {row.credentialsEmailed ? "(emailed)" : ""}</p> : null}
+                {row.pulses.map((pulse) => (
+                  <p key={pulse.week}>Week {pulse.week}: {pulse.disappointed}. Fix first: {pulse.fixFirst}</p>
+                ))}
+                {row.bugs.map((bug) => (
+                  <p key={bug.submittedAt}>Bug on {bug.screen}: {bug.actual}</p>
+                ))}
+                {row.join ? <p>Join note: {row.join.why} · {row.join.hours}</p> : null}
+              </div>
+            ) : null}
+          </CardContent>
+        </Card>
       ))}
 
-      <section className="card">
-        <h2 style={{ marginTop: 0 }}>Interview guide (45 minutes)</h2>
-        <p className="mute">Tell them you will take notes, that recording needs the consent they already gave, and that you want the honest version. Ask open questions. Do not defend the product.</p>
-        <table>
-          <tbody>
-            <tr><td>0 to 5 min</td><td>Warm-up. “Tell me about your job search so far.”</td></tr>
-            <tr><td>5 to 20 min</td><td>Their story. Pick two or three questionnaire answers and ask what happened last time.</td></tr>
-            <tr><td>20 to 35 min</td><td>Walk-through. Ask how they would find and act on a job today. Do not guide them.</td></tr>
-            <tr><td>35 to 42 min</td><td>“If we could only build one thing next, what should it be, and what would you give up for it?”</td></tr>
-            <tr><td>42 to 45 min</td><td>Ask who else you should talk to. Thank them. Reply to every yes or maybe within a week.</td></tr>
-          </tbody>
-        </table>
-      </section>
+      <Card>
+        <CardHeader><CardTitle>Interview guide (45 minutes)</CardTitle></CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">Tell them you will take notes, that recording needs the consent they already gave, and that you want the honest version. Ask open questions. Do not defend the product.</p>
+          <Table>
+            <tbody>
+              <TableRow><TableCell>0 to 5 min</TableCell><TableCell>Warm-up. “Tell me about your job search so far.”</TableCell></TableRow>
+              <TableRow><TableCell>5 to 20 min</TableCell><TableCell>Their story. Pick two or three questionnaire answers and ask what happened last time.</TableCell></TableRow>
+              <TableRow><TableCell>20 to 35 min</TableCell><TableCell>Walk-through. Ask how they would find and act on a job today. Do not guide them.</TableCell></TableRow>
+              <TableRow><TableCell>35 to 42 min</TableCell><TableCell>“If we could only build one thing next, what should it be, and what would you give up for it?”</TableCell></TableRow>
+              <TableRow><TableCell>42 to 45 min</TableCell><TableCell>Ask who else you should talk to. Thank them. Reply to every yes or maybe within a week.</TableCell></TableRow>
+            </tbody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   );
 }

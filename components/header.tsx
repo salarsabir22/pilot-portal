@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { api, usePilot } from "./pilot-context";
 
 export function Header() {
@@ -9,16 +10,15 @@ export function Header() {
   const [dark, setDark] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem("sj-theme");
-    const next = saved === "dark";
+    const next = localStorage.getItem("sj-theme") === "dark";
     setDark(next);
-    document.documentElement.dataset.theme = next ? "dark" : "light";
+    document.documentElement.classList.toggle("dark", next);
   }, []);
 
   function toggleTheme() {
     const next = !dark;
     setDark(next);
-    document.documentElement.dataset.theme = next ? "dark" : "light";
+    document.documentElement.classList.toggle("dark", next);
     localStorage.setItem("sj-theme", next ? "dark" : "light");
   }
 
@@ -29,23 +29,21 @@ export function Header() {
   }
 
   return (
-    <header>
-      <Link href="/" className="logo">
-        swypejobs<i>.</i> <span className="mute" style={{ fontWeight: 400 }}>pilot</span>
+    <header className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-3 border-b border-border bg-card px-5 py-3">
+      <Link href="/" className="text-[22px] font-extrabold tracking-tight">
+        swypejobs<span className="text-primary">.</span> <span className="text-sm font-normal text-muted-foreground">pilot</span>
       </Link>
-      <div className="tools">
-        <nav className="navlinks" aria-label="Portal">
-          <Link className="chip" href="/faq">FAQ</Link>
-          <Link className="chip" href="/help">Help</Link>
-          <Link className="chip" href="/admin">Founder</Link>
-        </nav>
-        <button className="chip" type="button" aria-pressed={dark} onClick={toggleTheme}>
+      <div className="flex flex-wrap items-center gap-2">
+        <Button variant="outline" size="sm" asChild><Link href="/faq">FAQ</Link></Button>
+        <Button variant="outline" size="sm" asChild><Link href="/help">Help</Link></Button>
+        <Button variant="outline" size="sm" asChild><Link href="/admin">Founder</Link></Button>
+        <Button variant="secondary" size="sm" type="button" aria-pressed={dark} onClick={toggleTheme}>
           {dark ? "Light" : "Dark"}
-        </button>
+        </Button>
         {participant ? (
-          <button className="chip" type="button" onClick={signOut}>
+          <Button variant="ghost" size="sm" type="button" onClick={signOut}>
             {participant.id} · Sign out
-          </button>
+          </Button>
         ) : null}
       </div>
     </header>

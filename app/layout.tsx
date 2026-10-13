@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-theme="light">
+    <html lang="en">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
@@ -19,7 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
         <meta name="robots" content="noindex, nofollow" />
       </head>
-      <body>
+      <body className="min-h-screen bg-background text-foreground antialiased">
         <PilotProvider>
           <Header />
           {children}

@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { api, usePilot } from "@/components/pilot-context";
 
 export default function InvitePage() {
@@ -56,10 +59,10 @@ export default function InvitePage() {
     return (
       <>
         <h1>Invite accepted</h1>
-        <p className="ok">You are in as {participant.id}.</p>
-        <button className="btn" type="button" onClick={() => router.push(participant.status === "invited" ? "/portal/agreements" : "/portal/access")}>
+        <p className="font-semibold text-primary">You are in as {participant.id}.</p>
+        <Button type="button" onClick={() => router.push(participant.status === "invited" ? "/portal/agreements" : "/portal/access")}>
           Continue
-        </button>
+        </Button>
       </>
     );
   }
@@ -68,8 +71,8 @@ export default function InvitePage() {
     return (
       <>
         <h1>You are signed in</h1>
-        <p className="ok">{participant.identity?.name} · {participant.id}</p>
-        <button className="btn" type="button" onClick={() => router.push("/portal/test")}>Go to the test guide</button>
+        <p className="font-semibold text-primary">{participant.identity?.name} · {participant.id}</p>
+        <Button type="button" onClick={() => router.push("/portal/test")}>Go to the test guide</Button>
       </>
     );
   }
@@ -81,21 +84,21 @@ export default function InvitePage() {
       {needsPassword ? (
         <>
           <p>This invite already has a password. Sign in with the email you verified{hint ? ` (${hint})` : ""}.</p>
-          <label htmlFor="email">Email</label>
-          <input id="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="username" />
-          <label htmlFor="password">Password</label>
-          <input id="password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" />
-          <div className="err">{error}</div>
-          <button className="btn" type="button" disabled={busy} onClick={signIn}>Sign in</button>
+          <Label htmlFor="email">Email</Label>
+          <Input id="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="username" />
+          <Label htmlFor="password" className="mt-3">Password</Label>
+          <Input id="password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" />
+          <p className="mt-2 text-sm text-destructive">{error}</p>
+          <Button className="mt-4" type="button" disabled={busy} onClick={signIn}>Sign in</Button>
         </>
       ) : (
         <>
-          <label htmlFor="code">Invite code</label>
-          <input id="code" value={code} onChange={(event) => setCode(event.target.value)} placeholder="Invite code" autoComplete="off" />
-          <div className="err">{error}</div>
-          <button className="btn" type="button" disabled={busy} onClick={openInvite}>Open my invite</button>
+          <Label htmlFor="code">Invite code</Label>
+          <Input id="code" value={code} onChange={(event) => setCode(event.target.value)} placeholder="Invite code" autoComplete="off" />
+          <p className="mt-2 text-sm text-destructive">{error}</p>
+          <Button className="mt-4" type="button" disabled={busy} onClick={openInvite}>Open my invite</Button>
           {demo ? (
-            <p className="mute" style={{ marginTop: 12 }}>
+            <p className="mt-3 text-sm text-muted-foreground">
               Demo code: <code>SJ-DEMO</code>. Spare codes: <code>SJ-INVITE-02</code>, <code>SJ-INVITE-03</code>.
             </p>
           ) : null}

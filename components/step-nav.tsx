@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 import { usePilot } from "./pilot-context";
 
 const STEPS = [
@@ -35,19 +36,25 @@ export function StepNav() {
 
   return (
     <nav aria-label="Pilot steps">
-      <ol>
+      <ol className="flex gap-2 overflow-x-auto md:flex-col">
         {STEPS.map((step) => {
           const open = unlocked(step.id);
           const current = pathname === step.href || (step.id === "feedback" && pathname.startsWith("/portal/feedback"));
           return (
-            <li key={step.id} className={done(step.id) ? "done" : ""}>
+            <li key={step.id}>
               <Link
                 href={open ? step.href : "#"}
-                className={`step${open ? "" : " locked"}`}
                 aria-current={current ? "step" : undefined}
                 aria-disabled={!open}
+                className={cn(
+                  "flex items-center gap-2 whitespace-nowrap rounded-xl border border-border bg-card px-3 py-2.5 text-sm",
+                  current && "border-primary font-semibold shadow-[inset_3px_0_0_var(--primary)]",
+                  !open && "pointer-events-none opacity-50",
+                )}
               >
-                <span className="dot">{done(step.id) ? "✓" : open ? "" : "·"}</span>
+                <span className={cn("grid h-5 w-5 place-items-center rounded-full border text-[11px]", done(step.id) && "border-primary bg-primary text-primary-foreground")}>
+                  {done(step.id) ? "✓" : ""}
+                </span>
                 {step.label}
               </Link>
             </li>

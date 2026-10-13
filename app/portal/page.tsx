@@ -16,5 +16,5 @@ export default function PortalIndex() {
     else router.replace("/portal/access");
   }, [participant, ready, router]);
 
-  return <p className="mute">Opening your step…</p>;
+  return <p className="text-sm text-muted-foreground">Opening your step…</p>;
 }

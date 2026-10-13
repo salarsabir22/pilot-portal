@@ -1,4 +1,5 @@
 import { pilot } from "@/lib/config";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const items = [
   ["Is this a job?", "No. The pilot is not employment, an internship, or a work placement, and it does not promise an interview or a role."],
@@ -15,14 +16,14 @@ const items = [
 
 export default function FaqPage() {
   return (
-    <div className="page">
+    <div className="mx-auto max-w-3xl space-y-3 px-5 py-8">
       <h1>FAQ</h1>
-      <p className="lede mute">Questions about the agreement, your data, the time, and what happens next.</p>
+      <p className="text-sm text-muted-foreground">Questions about the agreement, your data, the time, and what happens next.</p>
       {items.map(([title, body]) => (
-        <article className="card" key={title} style={{ marginBottom: 12 }}>
-          <h2 style={{ marginTop: 0 }}>{title}</h2>
-          <p>{body}</p>
-        </article>
+        <Card key={title}>
+          <CardHeader><CardTitle>{title}</CardTitle></CardHeader>
+          <CardContent>{body}</CardContent>
+        </Card>
       ))}
     </div>
   );

@@ -4,6 +4,9 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { api, usePilot } from "@/components/pilot-context";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 const fields = [
   ["screen", "Which screen or page were you on?"],
@@ -33,22 +36,22 @@ export default function BugPage() {
     }
   }
 
-  if (!ready) return <p className="mute">Loading…</p>;
+  if (!ready) return <p className="text-sm text-muted-foreground">Loading…</p>;
   if (participant?.status !== "active") return <p>Sign in first. <Link href="/portal/access">Access</Link></p>;
 
   return (
     <>
-      <Link className="btn alt" href="/portal/feedback" style={{ marginTop: 0 }}>Back</Link>
-      <h1>Report a bug</h1>
-      <p className="mute">Words only. Do not paste screenshots or product text. Our logs can match the time you give us.</p>
+      <Button variant="outline" asChild><Link href="/portal/feedback">Back</Link></Button>
+      <h1 className="mt-4">Report a bug</h1>
+      <p className="text-sm text-muted-foreground">Words only. Do not paste screenshots or product text. Our logs can match the time you give us.</p>
       {fields.map(([key, label]) => (
-        <div key={key}>
-          <label htmlFor={key}>{label}</label>
-          <textarea id={key} rows={3} value={form[key]} onChange={(event) => setForm({ ...form, [key]: event.target.value })} />
+        <div className="mt-3 space-y-2" key={key}>
+          <Label htmlFor={key}>{label}</Label>
+          <Textarea id={key} rows={3} value={form[key]} onChange={(event) => setForm({ ...form, [key]: event.target.value })} />
         </div>
       ))}
-      <div className="err">{error}</div>
-      <button className="btn" type="button" disabled={busy} onClick={submit}>Send bug report</button>
+      <p className="mt-2 text-sm text-destructive">{error}</p>
+      <Button className="mt-4" type="button" disabled={busy} onClick={submit}>Send bug report</Button>
     </>
   );
 }

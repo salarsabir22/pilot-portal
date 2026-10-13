@@ -4,6 +4,12 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { DocView } from "@/components/doc-view";
 import { api, usePilot } from "@/components/pilot-context";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Table, TableCell, TableHead, TableRow } from "@/components/ui/table";
 import { pilot } from "@/lib/config";
 import { consentBlocks, ndaBlocks } from "@/lib/documents";
 import {
@@ -110,13 +116,13 @@ export default function AgreementsPage() {
     }
   }
 
-  if (!ready) return <p className="mute">Loading…</p>;
+  if (!ready) return <p className="text-sm text-muted-foreground">Loading…</p>;
   if (!participant) {
     return (
       <>
         <h1>Step 1 is locked</h1>
         <p>Open your invite first.</p>
-        <Link className="btn" href="/portal/invite">Enter invite code</Link>
+        <Button asChild><Link href="/portal/invite">Enter invite code</Link></Button>
       </>
     );
   }
@@ -128,28 +134,26 @@ export default function AgreementsPage() {
         {participant.status === "signed" ? (
           <p>Thank you. A founder reviews this within {pilot.approvalHours} hours, countersigns, and then Step 2 unlocks. Your record is saved with the time, device, and document version.</p>
         ) : (
-          <p className="ok">The founders countersigned. You can continue to access.</p>
+        <p className="font-semibold text-primary">The founders countersigned. You can continue to access.</p>
         )}
-        <div className="scroll">
-          <table>
+        <Table>
             <tbody>
-              <tr><th>Participant</th><td>{participant.identity?.name} ({participant.id})</td></tr>
-              <tr><th>CNIC</th><td>{participant.cnicMasked}</td></tr>
-              <tr><th>Signed at</th><td>{participant.audit.signedAt}</td></tr>
-              <tr><th>IP address</th><td>{participant.audit.ip}</td></tr>
-              <tr><th>Document</th><td>{participant.audit.documentVersion}</td></tr>
-              <tr><th>Document hash</th><td><code>{participant.audit.documentHash.slice(0, 16)}</code></td></tr>
-              <tr><th>OTP</th><td>Confirmed by email</td></tr>
+              <TableRow><TableHead>Participant</TableHead><TableCell>{participant.identity?.name} ({participant.id})</TableCell></TableRow>
+              <TableRow><TableHead>CNIC</TableHead><TableCell>{participant.cnicMasked}</TableCell></TableRow>
+              <TableRow><TableHead>Signed at</TableHead><TableCell>{participant.audit.signedAt}</TableCell></TableRow>
+              <TableRow><TableHead>IP address</TableHead><TableCell>{participant.audit.ip}</TableCell></TableRow>
+              <TableRow><TableHead>Document</TableHead><TableCell>{participant.audit.documentVersion}</TableCell></TableRow>
+              <TableRow><TableHead>Document hash</TableHead><TableCell><code>{participant.audit.documentHash.slice(0, 16)}</code></TableCell></TableRow>
+              <TableRow><TableHead>OTP</TableHead><TableCell>Confirmed by email</TableCell></TableRow>
               {participant.audit.countersignedAt ? (
-                <tr><th>Countersigned</th><td>{participant.audit.countersignedBy} · {participant.audit.countersignedAt}</td></tr>
+                <TableRow><TableHead>Countersigned</TableHead><TableCell>{participant.audit.countersignedBy} · {participant.audit.countersignedAt}</TableCell></TableRow>
               ) : null}
             </tbody>
-          </table>
-        </div>
-        <div className="row-actions">
-          <Link className="btn" href="/portal/record">View the signed record</Link>
+          </Table>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Button asChild><Link href="/portal/record">View the signed record</Link></Button>
           {participant.status === "approved" || participant.status === "active" ? (
-            <Link className="btn alt" href="/portal/access">Go to Step 2</Link>
+            <Button variant="outline" asChild><Link href="/portal/access">Go to Step 2</Link></Button>
           ) : null}
         </div>
       </>
@@ -163,19 +167,19 @@ export default function AgreementsPage() {
         Before we show you anything, we need two things from you. First, a confidentiality agreement, because we are testing something that is not public yet. Second, your consent, so you know exactly what we collect and why. It takes about 10 minutes. Please read carefully and ask us anything.
       </p>
       {!pilot.documentsFinal ? (
-        <div className="banner">
+        <Alert className="mb-4 border-dashed bg-secondary">
           Draft for lawyer review. Bracketed names, dates, and the choices in clauses 9 and 10 are not final. Ask us to explain any clause in Urdu.
-        </div>
+        </Alert>
       ) : null}
       <h2>1. Read the NDA and consent form</h2>
       <div className="doc" id="doc" tabIndex={0} onScroll={onScroll}>
         <DocView blocks={blocks} />
       </div>
-      <p className="mute">{scrolled ? <span className="ok">Read to the end.</span> : "Scroll to the end to continue."}</p>
+      <p className="text-sm text-muted-foreground">{scrolled ? <span className="font-semibold text-primary">Read to the end.</span> : "Scroll to the end to continue."}</p>
 
       <fieldset disabled={!scrolled}>
         <h2>2. Your details</h2>
-        <div className="grid">
+        <div className="grid gap-x-4 md:grid-cols-2">
           {IDENTITY_FIELDS.slice(0, 2).map((field) => (
             <Field key={field.key} id={field.key} label={field.label} value={form[field.key] || ""} onChange={(value) => setForm({ ...form, [field.key]: value })} />
           ))}
@@ -184,55 +188,55 @@ export default function AgreementsPage() {
             <Field key={field.key} id={field.key} label={field.label} value={form[field.key] || ""} onChange={(value) => setForm({ ...form, [field.key]: value })} />
           ))}
         </div>
-        <label className="cb">
-          <input type="checkbox" checked={adult} onChange={(event) => setAdult(event.target.checked)} />
+        <Label className="mt-3 flex items-start gap-3 font-normal">
+          <Checkbox checked={adult} onCheckedChange={(value) => setAdult(value === true)} className="mt-0.5" />
           I am at least 18, currently enrolled, and my details are true and complete.
-        </label>
+        </Label>
 
         <h2>3. Consent</h2>
-        <p className="mute">Required</p>
+        <p className="text-sm text-muted-foreground">Required</p>
         {REQUIRED_CONSENTS.map((label, index) => (
-          <label className="cb" key={label}>
-            <input
-              type="checkbox"
+          <Label className="mt-2 flex items-start gap-3 font-normal" key={label}>
+            <Checkbox
               checked={required[index]}
-              onChange={(event) => setRequired(required.map((item, i) => (i === index ? event.target.checked : item)))}
+              onCheckedChange={(value) => setRequired(required.map((item, i) => (i === index ? value === true : item)))}
+              className="mt-0.5"
             />
             {label}
-          </label>
+          </Label>
         ))}
-        <p className="mute">Optional. You can say no and still take part.</p>
+        <p className="text-sm text-muted-foreground">Optional. You can say no and still take part.</p>
         {OPTIONAL_CONSENTS.map((label, index) => (
-          <label className="cb" key={label}>
-            <input
-              type="checkbox"
+          <Label className="mt-2 flex items-start gap-3 font-normal" key={label}>
+            <Checkbox
               checked={optional[index]}
-              onChange={(event) => setOptional(optional.map((item, i) => (i === index ? event.target.checked : item)))}
+              onCheckedChange={(value) => setOptional(optional.map((item, i) => (i === index ? value === true : item)))}
+              className="mt-0.5"
             />
             {label}
-          </label>
+          </Label>
         ))}
 
         <h2>4. Verify and sign</h2>
-        <label htmlFor="sig">Type your full name to sign</label>
-        <input id="sig" value={sig} onChange={(event) => setSig(event.target.value)} autoComplete="name" />
-        <div className="row-actions">
-          <button className="btn alt" type="button" style={{ marginLeft: 0 }} disabled={busy} onClick={sendOtp}>
+        <Label htmlFor="sig">Type your full name to sign</Label>
+        <Input id="sig" value={sig} onChange={(event) => setSig(event.target.value)} autoComplete="name" />
+        <div className="mt-3 flex flex-wrap items-center gap-3">
+          <Button variant="outline" type="button" disabled={busy} onClick={sendOtp}>
             Send one-time password
-          </button>
-          <span className="mute">{otpNote}</span>
+          </Button>
+          <span className="text-sm text-muted-foreground">{otpNote}</span>
         </div>
-        <label htmlFor="otp">One-time password</label>
-        <input id="otp" inputMode="numeric" maxLength={6} value={otp} onChange={(event) => setOtp(event.target.value)} style={{ maxWidth: 200 }} />
-        <div className="err">{error}</div>
+        <Label htmlFor="otp" className="mt-3">One-time password</Label>
+        <Input id="otp" inputMode="numeric" maxLength={6} value={otp} onChange={(event) => setOtp(event.target.value)} className="max-w-[200px]" />
+        <p className="mt-2 text-sm text-destructive">{error}</p>
         {mismatch ? (
-          <button className="btn" type="button" disabled={busy} onClick={() => sign(true)}>
+          <Button className="mt-3" type="button" disabled={busy} onClick={() => sign(true)}>
             Sign anyway with this name
-          </button>
+          </Button>
         ) : (
-          <button className="btn" type="button" disabled={busy} onClick={() => sign(false)}>
+          <Button className="mt-3" type="button" disabled={busy} onClick={() => sign(false)}>
             Sign and submit
-          </button>
+          </Button>
         )}
       </fieldset>
     </>
@@ -241,9 +245,9 @@ export default function AgreementsPage() {
 
 function Field({ id, label, value, onChange }: { id: string; label: string; value: string; onChange: (value: string) => void }) {
   return (
-    <div>
-      <label htmlFor={id}>{label}</label>
-      <input id={id} value={value} onChange={(event) => onChange(event.target.value)} />
+    <div className="space-y-2">
+      <Label htmlFor={id}>{label}</Label>
+      <Input id={id} value={value} onChange={(event) => onChange(event.target.value)} />
     </div>
   );
 }

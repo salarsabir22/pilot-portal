@@ -4,6 +4,10 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { api, usePilot } from "@/components/pilot-context";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { pilot } from "@/lib/config";
 import { RULES, type PublicParticipant } from "@/lib/types";
 
@@ -33,7 +37,7 @@ export default function AccessPage() {
     }
   }
 
-  if (!ready) return <p className="mute">Loading…</p>;
+  if (!ready) return <p className="text-sm text-muted-foreground">Loading…</p>;
   if (!participant) return <p>Open your invite first. <Link href="/portal/invite">Enter code</Link></p>;
   if (participant.status === "invited") return <p>Finish Step 1 first. <Link href="/portal/agreements">Agreements</Link></p>;
   if (participant.status === "signed") {
@@ -48,8 +52,8 @@ export default function AccessPage() {
     return (
       <>
         <h1>Signed in</h1>
-        <p className="ok">First sign-in confirmed. Your pilot has started.</p>
-        <Link className="btn" href="/portal/test">Go to Step 3: Test guide</Link>
+        <p className="font-semibold text-primary">First sign-in confirmed. Your pilot has started.</p>
+        <Button asChild><Link href="/portal/test">Go to Step 3: Test guide</Link></Button>
       </>
     );
   }
@@ -59,18 +63,18 @@ export default function AccessPage() {
     <>
       <h1>Step 2 of 4: Access</h1>
       <p>You are approved. Welcome to the pilot, {first}. Your login was prepared for the email and mobile you verified.</p>
-      <div className="box">
+      <div className="rounded-2xl bg-secondary p-4">
         <b>Credentials</b>
-        <p className="mute" style={{ margin: "6px 0" }}>
+        <p className="my-1.5 text-sm text-muted-foreground">
           Username: {participant.identity?.uemail}
           <br />
           Sign-in: this page
         </p>
         {participant.tempPassword ? (
           <>
-            <p className="mute">Temporary password</p>
-            <div className="pw">{participant.tempPassword}</div>
-            <p className="mute">The credentials email did not go out. Use this temporary password once, then replace it below.</p>
+            <p className="text-sm text-muted-foreground">Temporary password</p>
+            <p className="font-mono text-lg font-bold tracking-wide">{participant.tempPassword}</p>
+            <p className="text-sm text-muted-foreground">The credentials email did not go out. Use this temporary password once, then replace it below.</p>
           </>
         ) : (
           <p>Check the credentials email, then set a new password below. The temporary password will not work after you change it.</p>
@@ -82,15 +86,15 @@ export default function AccessPage() {
           <li key={rule}>{rule}</li>
         ))}
       </ol>
-      <p className="mute">Your name appears as a watermark inside the portal and your activity is logged, as described in the consent form you signed.</p>
-      <label className="cb">
-        <input type="checkbox" checked={rules} onChange={(event) => setRules(event.target.checked)} />
+      <p className="text-sm text-muted-foreground">Your name appears as a watermark inside the portal and your activity is logged, as described in the consent form you signed.</p>
+      <Label className="mt-3 flex items-start gap-3 font-normal">
+        <Checkbox checked={rules} onCheckedChange={(value) => setRules(value === true)} className="mt-0.5" />
         I have read the rules.
-      </label>
-      <label htmlFor="np">Set a new password</label>
-      <input id="np" type="password" value={password} onChange={(event) => setPassword(event.target.value)} style={{ maxWidth: 320 }} autoComplete="new-password" />
-      <div className="err">{error}</div>
-      <button className="btn" type="button" disabled={busy} onClick={activate}>Sign in and confirm</button>
+      </Label>
+      <Label htmlFor="np" className="mt-3">Set a new password</Label>
+      <Input id="np" type="password" value={password} onChange={(event) => setPassword(event.target.value)} className="max-w-xs" autoComplete="new-password" />
+      <p className="mt-2 text-sm text-destructive">{error}</p>
+      <Button className="mt-4" type="button" disabled={busy} onClick={activate}>Sign in and confirm</Button>
     </>
   );
 }
