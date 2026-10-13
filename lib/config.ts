@@ -1,0 +1,33 @@
+export const pilot = {
+  brand: "swypejobs.",
+  companyLegalName: "[Registered legal name of the company, or names of the founders]",
+  officeAddress: "[office address], Karachi, Pakistan",
+  founderName: "[Founder name]",
+  contactName: "[name]",
+  contactEmail: "pilot@swypejobs.app",
+  whatsapp: "[WhatsApp number]",
+  responseTime: "within 24 hours",
+  pilotStart: "[start date]",
+  pilotEnd: "[end date]",
+  place: "Karachi, Pakistan",
+  confidentialityYears: 3,
+  identityRetentionYears: 2,
+  otherDataMonths: 12,
+  recordingRetentionDays: 90,
+  weeklyHours: 5,
+  testingWeeks: 4,
+  approvalHours: 24,
+  pulseDeadline: "Sunday 9 pm",
+  interviewMinutes: 45,
+  rewards:
+    "early access when we launch, a participation certificate, a LinkedIn recommendation from the founders, priority introductions to employers, and swag",
+  /** Show both lawyer options until a choice is confirmed. Set to "A" or "B" after legal review. */
+  breachOption: "both" as "A" | "B" | "both",
+  fixedSumPkr: "[amount]",
+  disputeOption: "both" as "A" | "B" | "both",
+  /** Flip to true after the lawyer signs off, to hide the draft banner. */
+  documentsFinal: false,
+  documentVersion: "NDA v1.0-draft + Consent v1.0-draft",
+  agreementRefPrefix: "SJ-NDA",
+  consentRefPrefix: "SJ-CF",
+};
