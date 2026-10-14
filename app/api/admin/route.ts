@@ -1,4 +1,5 @@
 import { randomBytes } from "crypto";
+import { appLoginUrl, disableStudentAccount, ensureStudentAccount } from "@/lib/app-account";
 import { pilot } from "@/lib/config";
 import { decrypt, encrypt, hashPassword, safeEqualString, tempPassword } from "@/lib/crypto";
 import { credentialsMessage, deliveryConfigured, sendMail } from "@/lib/notify";
@@ -68,17 +69,29 @@ export async function POST(request: Request) {
   if (body?.action === "approve") {
     const password = tempPassword();
     const origin = new URL(request.url).origin;
+    const current = await readDb();
+    const pending = current.participants.find((item) => item.id === body.id);
+    if (!pending) return Response.json({ error: "Participant not found." }, { status: 404 });
+    if (pending.status !== "signed" || !pending.audit || !pending.identity) {
+      return Response.json({ error: "This student has not signed yet." }, { status: 400 });
+    }
+    const email = pending.identity.pemail || pending.identity.uemail;
+    if (!email) return Response.json({ error: "This student has no email address." }, { status: 400 });
+    const account = await ensureStudentAccount({
+      email,
+      password,
+      fullName: pending.identity.name || email,
+    });
+    if ("error" in account) return Response.json({ error: account.error }, { status: 502 });
     const result = await updateDb((db) => {
       const participant = db.participants.find((item) => item.id === body.id);
-      if (!participant) return { error: "Participant not found.", status: 404 };
-      if (participant.status !== "signed" || !participant.audit || !participant.identity) {
-        return { error: "This student has not signed yet.", status: 400 };
-      }
+      if (!participant || !participant.audit) return { error: "Participant not found.", status: 404 };
       const now = new Date().toISOString();
       participant.audit.countersignedAt = now;
       participant.audit.countersignedBy = pilot.founderName;
       participant.passwordHash = hashPassword(password);
       participant.tempPasswordEnc = encrypt(password);
+      participant.appUserId = account.id;
       participant.status = "approved";
       participant.logs.push({
         at: now,
@@ -90,11 +103,20 @@ export async function POST(request: Request) {
     });
     if ("error" in result) return Response.json({ error: result.error }, { status: result.status });
     const person = result.participant;
-    const email = person.identity?.uemail || person.identity?.pemail || "";
+    const university = person.identity?.uemail?.trim();
+    const recipients = Array.from(new Set([email, university].filter((item): item is string => Boolean(item))));
+    const appLogin = appLoginUrl();
     const mailed = await sendMail({
-      to: [email],
+      to: recipients,
       subject: "Your swypejobs. pilot access",
-      text: credentialsMessage(person.identity?.name.split(" ")[0] || "there", email, password, `${origin}/portal/access`),
+      text: credentialsMessage({
+        firstName: person.identity?.name.split(" ")[0] || "there",
+        email,
+        password,
+        portalLink: `${origin}/portal/invite`,
+        appLink: appLogin,
+        inviteCode: person.inviteCode,
+      }),
     });
     if (mailed.sent) {
       await updateDb((db) => {
@@ -102,7 +124,7 @@ export async function POST(request: Request) {
         if (participant) participant.credentialsEmailed = true;
       });
     }
-    return Response.json({ ok: true, tempPassword: password, emailed: mailed.sent, email });
+    return Response.json({ ok: true, tempPassword: password, emailed: mailed.sent, email, appLogin });
   }
 
   if (body?.action === "create-invite") {
@@ -114,10 +136,13 @@ export async function POST(request: Request) {
   }
 
   if (body?.action === "revoke") {
+    const current = await readDb();
+    const existing = current.participants.find((item) => item.id === body.id);
     await updateDb((db) => {
       const participant = db.participants.find((item) => item.id === body.id);
       if (participant) participant.status = "revoked";
     });
+    if (existing?.appUserId) await disableStudentAccount(existing.appUserId);
     return Response.json({ ok: true });
   }
 

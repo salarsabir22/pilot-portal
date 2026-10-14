@@ -62,14 +62,14 @@ export default function AdminPage() {
   async function act(action: string, id?: string, extra?: Record<string, string>) {
     setError("");
     try {
-      const data = await api<{ tempPassword?: string; emailed?: boolean; email?: string; code?: string }>("/api/admin", {
+      const data = await api<{ tempPassword?: string; emailed?: boolean; email?: string; code?: string; appLogin?: string }>("/api/admin", {
         action,
         id,
         ...extra,
       });
       if (data.tempPassword) {
         setIssued(
-          `${data.email}: ${data.tempPassword}${data.emailed ? " (also emailed)" : " (copy this, email is not connected)"}`,
+          `${data.email}: ${data.tempPassword}. App login: ${data.appLogin}${data.emailed ? " (also emailed)" : " (copy this, email is not connected)"}`,
         );
       }
       if (data.code) setIssued(`New invite code: ${data.code}`);

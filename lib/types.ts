@@ -108,6 +108,7 @@ export type Participant = {
   passwordHash?: string;
   tempPasswordEnc?: string;
   credentialsEmailed?: boolean;
+  appUserId?: string;
   firstSignInAt?: string;
   otpHash?: string;
   otpExpires?: string;

@@ -29,19 +29,33 @@ export function otpMessage(code: string) {
   return `Your swypejobs. pilot verification code is ${code}. It expires in 10 minutes. If you did not ask for this, ignore it.`;
 }
 
-export function credentialsMessage(firstName: string, email: string, password: string, link: string) {
+export function credentialsMessage(input: {
+  firstName: string;
+  email: string;
+  password: string;
+  portalLink: string;
+  appLink: string;
+  inviteCode: string;
+}) {
   return [
-    `Hi ${firstName},`,
+    `Hi ${input.firstName},`,
     "",
     "You are approved. Welcome to the pilot.",
     "",
-    `Your sign-in: ${link}`,
-    `Username: ${email}`,
-    `Temporary password: ${password} (you will be asked to change it)`,
+    "The app you will test:",
+    input.appLink,
+    `Email: ${input.email}`,
+    `Temporary password: ${input.password}`,
+    "Sign in, then finish the short profile if it asks. Use this same password until you change it in the app.",
     "",
-    "Please remember: this account is yours alone, do not share it, and do not take screenshots or screen recordings. Your name will appear as a watermark inside the app, and your activity is logged, as described in the consent form you signed.",
+    "The pilot portal (your guide, pulse, and feedback):",
+    input.portalLink,
+    `Invite code: ${input.inviteCode}`,
+    "Use the same email. You will set a separate password for the portal.",
     "",
-    `Stuck? Reply here or message ${pilot.whatsapp}.`,
+    "Please remember: these accounts are yours alone, do not share them, and do not take screenshots or screen recordings.",
+    "",
+    `Stuck? Reply here or email ${pilot.contactEmail}.`,
     "",
     `Thank you for helping us build this. ${pilot.founderName}, swypejobs.`,
   ].join("\n");
