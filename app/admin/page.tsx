@@ -5,7 +5,7 @@ import { api } from "@/components/pilot-context";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -100,43 +100,69 @@ export default function AdminPage() {
 
   const signed = rows.filter((row) => row.status === "signed").length;
   const active = rows.filter((row) => row.status === "active").length;
+  const targets = [
+    ["60%", "Active every week"],
+    ["70%", "Complete the pulse"],
+    ["A match", "For most active students"],
+    ["40%+", "Very disappointed if it went away"],
+    ["Week 3", "Top three fixes decided"],
+  ];
 
   return (
     <div className="mx-auto max-w-5xl space-y-8 px-6 py-12 md:py-16">
-      <h1>Founder view</h1>
-      <p className="text-sm text-muted-foreground">{rows.length} participants · {signed} waiting for approval · {active} signed in</p>
+      <div className="space-y-2">
+        <h1>Founder view</h1>
+        <p className="text-sm text-muted-foreground">{rows.length} participants · {signed} waiting for approval · {active} signed in</p>
+      </div>
       {delivery.email ? (
-        <p className="font-semibold text-primary">Verification email is configured. Codes are emailed and are not shown on screen.</p>
+        <Alert>Verification email is configured. Codes are emailed and are not shown on screen.</Alert>
       ) : (
         <Alert className="border-dashed bg-secondary">
           Verification email is not set up yet. Add RESEND_API_KEY and PILOT_EMAIL_FROM, then restart the server.
         </Alert>
       )}
-      {issued ? <p className="font-semibold text-primary">{issued}</p> : null}
+      {issued ? <Alert className="font-semibold text-primary">{issued}</Alert> : null}
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
-      <div className="grid items-start gap-6 md:grid-cols-3">
-        <Card>
-          <CardHeader><CardTitle>New invite</CardTitle></CardHeader>
-          <CardContent className="space-y-3">
-            <Label htmlFor="note">Note</Label>
-            <Input id="note" value={note} onChange={(event) => setNote(event.target.value)} placeholder="LUMS, batch A" />
+
+      <Card>
+        <CardHeader>
+          <CardTitle>New invite</CardTitle>
+          <CardDescription>One-time code. Give it to that student only.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+            <div className="min-w-0 flex-1">
+              <Label htmlFor="note">Note</Label>
+              <Input id="note" value={note} onChange={(event) => setNote(event.target.value)} placeholder="LUMS, batch A" />
+            </div>
             <Button type="button" onClick={() => act("create-invite", undefined, { note })}>Create code</Button>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader><CardTitle>Demo</CardTitle></CardHeader>
-          <CardContent className="space-y-3">
-            <p className="text-sm text-muted-foreground">Resets SJ-DEMO / SJ-P-001 so you can walk the flow again.</p>
-            <Button type="button" onClick={() => act("reset-demo")}>Reset demo student</Button>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader><CardTitle>Targets</CardTitle></CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">60% active every week. 70% complete the pulse. Most active students get a match. 40% or more say “very disappointed” if it went away. Top three fixes by week 3.</p>
-          </CardContent>
-        </Card>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="space-y-3">
+        <h2 className="m-0 text-lg">Targets</h2>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          {targets.map(([value, label]) => (
+            <Card key={label}>
+              <CardContent className="p-5 pt-5 sm:p-5 sm:pt-5">
+                <p className="text-2xl font-extrabold tracking-tight">{value}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{label}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
+
+      <Card>
+        <CardContent className="flex flex-col gap-4 p-5 pt-5 sm:flex-row sm:items-center sm:justify-between sm:p-6 sm:pt-6">
+          <div className="space-y-1">
+            <p className="font-semibold">Demo student</p>
+            <p className="text-sm text-muted-foreground">Resets SJ-DEMO / SJ-P-001 so you can walk the flow again.</p>
+          </div>
+          <Button variant="outline" type="button" onClick={() => act("reset-demo")}>Reset demo student</Button>
+        </CardContent>
+      </Card>
 
       <h2>Invites</h2>
       <Table>
