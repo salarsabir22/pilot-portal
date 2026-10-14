@@ -23,17 +23,19 @@ export default function HomePage() {
   return (
     <div className="mx-auto max-w-5xl space-y-8 px-6 py-12 md:py-16">
       <Card>
-        <CardHeader className="space-y-3">
-          <p className="text-xs font-bold uppercase tracking-wide text-primary">Private · 25 students · not public</p>
-          <CardTitle className="max-w-xl text-3xl font-extrabold sm:text-4xl">Welcome to the swypejobs. pilot</CardTitle>
-        </CardHeader>
-        <CardContent className="max-w-2xl space-y-5 text-[15px] leading-relaxed">
-          <p>
-            A closed test of a swipe-based job app for students. You use a pre-release build, tell us what is confusing,
-            and help us decide what to build next. You only see the product after Step 1 is signed and a founder has approved you.
-          </p>
-          <p>It takes up to {pilot.weeklyHours} hours a week for {pilot.testingWeeks} weeks. You can spread that time however you like.</p>
-          <Button asChild><Link href="/portal/invite">Open my invite</Link></Button>
+        <CardContent className="grid items-center gap-8 p-8 sm:p-10 lg:grid-cols-2 lg:gap-12 lg:p-12">
+          <div className="space-y-6">
+            <p className="text-xs font-bold uppercase tracking-wide text-primary">Private · 25 students · not public</p>
+            <h1 className="text-4xl sm:text-5xl">Welcome to the swypejobs. pilot</h1>
+            <Button asChild><Link href="/portal/invite">Open my invite</Link></Button>
+          </div>
+          <div className="space-y-4 text-[15px] leading-relaxed text-muted-foreground">
+            <p>
+              A closed test of a swipe-based job app for students. You use a pre-release build, tell us what is confusing,
+              and help us decide what to build next. You only see the product after Step 1 is signed and a founder has approved you.
+            </p>
+            <p>It takes up to {pilot.weeklyHours} hours a week for {pilot.testingWeeks} weeks. You can spread that time however you like.</p>
+          </div>
         </CardContent>
       </Card>
       <div className="space-y-3">
