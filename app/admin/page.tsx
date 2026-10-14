@@ -59,6 +59,20 @@ export default function AdminPage() {
     }
   }
 
+  async function logout() {
+    setError("");
+    try {
+      await api("/api/admin", { action: "logout" });
+      setAuthed(false);
+      setRows([]);
+      setInvites([]);
+      setIssued("");
+      setPassword("");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not sign out.");
+    }
+  }
+
   async function act(action: string, id?: string, extra?: Record<string, string>) {
     setError("");
     try {
@@ -110,9 +124,12 @@ export default function AdminPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-8 px-6 py-12 md:py-16">
-      <div className="space-y-2">
-        <h1>Founder view</h1>
-        <p className="text-sm text-muted-foreground">{rows.length} participants · {signed} waiting for approval · {active} signed in</p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="space-y-2">
+          <h1>Founder view</h1>
+          <p className="text-sm text-muted-foreground">{rows.length} participants · {signed} waiting for approval · {active} signed in</p>
+        </div>
+        <Button variant="outline" type="button" onClick={logout}>Sign out</Button>
       </div>
       {delivery.email ? (
         <Alert>Verification email is configured. Codes are emailed and are not shown on screen.</Alert>

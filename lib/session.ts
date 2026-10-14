@@ -7,14 +7,21 @@ import type { Participant, PublicParticipant } from "./types";
 const SESSION = "pilot_session";
 const ADMIN = "pilot_admin";
 
-export function cookieOptions() {
+function baseCookie() {
   return {
     httpOnly: true,
     sameSite: "lax" as const,
     secure: process.env.NODE_ENV === "production",
     path: "/",
-    maxAge: 60 * 60 * 24 * 30,
   };
+}
+
+export function cookieOptions() {
+  return { ...baseCookie(), maxAge: 60 * 60 * 24 * 30 };
+}
+
+function adminCookieOptions() {
+  return { ...baseCookie(), maxAge: 60 * 60 * 12 };
 }
 
 export function setParticipantCookie(id: string) {
@@ -26,11 +33,11 @@ export function clearParticipantCookie() {
 }
 
 export function setAdminCookie() {
-  cookies().set(ADMIN, signToken("founder"), cookieOptions());
+  cookies().set(ADMIN, signToken("founder"), adminCookieOptions());
 }
 
 export function clearAdminCookie() {
-  cookies().set(ADMIN, "", { ...cookieOptions(), maxAge: 0 });
+  cookies().set(ADMIN, "", { ...adminCookieOptions(), maxAge: 0 });
 }
 
 export function currentParticipantId() {
