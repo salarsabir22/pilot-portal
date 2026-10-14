@@ -66,7 +66,12 @@ function localFallback(): Database | null {
 
 async function readRemote(): Promise<Database> {
   const { url } = supabaseEnv();
-  const res = await fetch(`${url}/storage/v1/object/${bucket}/${objectPath}`, { headers: headers() });
+  // Next caches GET fetch, and Supabase caches the file for an hour. Either one keeps an old
+  // state.json, so a new invite or email code is checked against the previous copy and fails.
+  const res = await fetch(`${url}/storage/v1/object/${bucket}/${objectPath}?t=${Date.now()}`, {
+    headers: headers({ "Cache-Control": "no-cache", Pragma: "no-cache" }),
+    cache: "no-store",
+  });
   if (res.status === 404 || res.status === 400) {
     const initial = localFallback() ?? seed();
     await writeRemote(initial);
@@ -81,7 +86,12 @@ async function writeRemote(db: Database) {
   await ensureBucket();
   const res = await fetch(`${url}/storage/v1/object/${bucket}/${objectPath}`, {
     method: "POST",
-    headers: headers({ "Content-Type": "application/json", "x-upsert": "true" }),
+    headers: headers({
+      "Content-Type": "application/json",
+      "x-upsert": "true",
+      "cache-control": "0",
+    }),
+    cache: "no-store",
     body: JSON.stringify(db),
   });
   if (!res.ok) throw new Error(`Could not save pilot records (${res.status}).`);

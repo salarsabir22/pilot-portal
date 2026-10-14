@@ -22,7 +22,7 @@ function openSession(participant: Participant) {
 
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as { code?: string } | null;
-  const code = body?.code?.trim().toUpperCase() ?? "";
+  const code = (body?.code ?? "").replace(/\s+/g, "").toUpperCase();
   if (!code) return Response.json({ error: "Enter your invite code." }, { status: 400 });
 
   const result = await updateDb((db) => {

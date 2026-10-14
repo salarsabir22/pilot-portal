@@ -46,7 +46,7 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
-  const otp = body?.otp?.trim() ?? "";
+  const otp = (body?.otp ?? "").replace(/\D/g, "");
   if (!/^\d{6}$/.test(otp)) return Response.json({ error: "Enter the 6-digit code." }, { status: 400 });
 
   const result = await updateDb((db) => {
