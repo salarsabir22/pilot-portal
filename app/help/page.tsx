@@ -3,10 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function HelpPage() {
   return (
-    <div className="mx-auto max-w-5xl space-y-6 px-6 py-12 md:py-16">
+    <div className="mx-auto max-w-xl space-y-6 px-6 py-12 md:py-16">
       <h1>Help</h1>
       <p>Ask us anything before you sign, or if you get stuck after. We reply {pilot.responseTime}.</p>
-      <Card className="max-w-md">
+      <Card>
         <CardHeader><CardTitle>Email</CardTitle></CardHeader>
         <CardContent>
           <p><a className="text-primary underline" href={`mailto:${pilot.contactEmail}`}>{pilot.contactEmail}</a></p>

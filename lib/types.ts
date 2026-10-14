@@ -150,18 +150,18 @@ export type PublicParticipant = {
 };
 
 export const IDENTITY_FIELDS: { key: keyof Identity; label: string }[] = [
-  { key: "name", label: "Full name (exactly as on CNIC)" },
-  { key: "father", label: "Father’s / husband’s name (as on CNIC)" },
-  { key: "dob", label: "Date of birth (DD/MM/YYYY)" },
-  { key: "mobile", label: "Mobile number (WhatsApp)" },
+  { key: "name", label: "Full name" },
+  { key: "father", label: "Father’s / husband’s name (optional)" },
+  { key: "dob", label: "Date of birth (optional)" },
+  { key: "mobile", label: "Mobile number" },
   { key: "pemail", label: "Personal email" },
-  { key: "uemail", label: "University email" },
-  { key: "uni", label: "University and campus" },
-  { key: "prog", label: "Programme and semester / year" },
-  { key: "sid", label: "Student ID" },
-  { key: "addr", label: "Permanent address (as on CNIC)" },
-  { key: "res", label: "Current residential address" },
-  { key: "ref", label: "Reference contact (name, relationship, phone)" },
+  { key: "uemail", label: "University email (optional)" },
+  { key: "uni", label: "University and campus (optional)" },
+  { key: "prog", label: "Programme and semester / year (optional)" },
+  { key: "sid", label: "Student ID (optional)" },
+  { key: "addr", label: "Permanent address (optional)" },
+  { key: "res", label: "Current residential address (optional)" },
+  { key: "ref", label: "Reference contact (optional)" },
 ];
 
 export const REQUIRED_CONSENTS = [

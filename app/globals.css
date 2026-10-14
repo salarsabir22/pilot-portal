@@ -98,23 +98,7 @@ p { margin: 0; line-height: 1.6; }
 
 .doc h3 { margin: 1.25rem 0 0.4rem; font-size: 1rem; }
 
-.watermark {
-  position: fixed;
-  inset: -20%;
-  z-index: 40;
-  pointer-events: none;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 48px 24px;
-  align-content: center;
-  transform: rotate(-18deg);
-  opacity: 0.09;
-  font-weight: 800;
-  font-size: 14px;
-  letter-spacing: 0.04em;
-}
-
 @media print {
-  header, nav, .watermark { display: none !important; }
+  header, nav { display: none !important; }
   body { background: #fff; color: #000; }
 }

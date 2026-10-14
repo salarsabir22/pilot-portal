@@ -26,27 +26,19 @@ export default function FeedbackHub() {
         {" "}End-of-pilot questionnaire: {end === "submitted" ? "submitted" : end === "draft" ? "in progress" : "not started"}.
         {" "}Join swypejobs.: {participant.join ? participant.join.interest : "not answered"}.
       </p>
-      <div className="grid gap-5 sm:grid-cols-2">
-        <Card className="p-4">
-          <b>Weekly pulse survey</b>
-          <p className="text-sm text-muted-foreground">3 minutes. Due {pilot.pulseDeadline}.</p>
-          <Button className="mt-2" asChild><Link href="/portal/feedback/pulse">Open</Link></Button>
-        </Card>
-        <Card className="p-4">
-          <b>Report a bug</b>
-          <p className="text-sm text-muted-foreground">Words only, no screenshots.</p>
-          <Button className="mt-2" asChild><Link href="/portal/feedback/bug">Open</Link></Button>
-        </Card>
-        <Card className="p-4">
-          <b>Pilot feedback questionnaire</b>
-          <p className="text-sm text-muted-foreground">Week 2: sections A to E. Week 4: all sections. About 25 to 30 minutes.</p>
-          <Button className="mt-2" asChild><Link href="/portal/feedback/questionnaire">Open</Link></Button>
-        </Card>
-        <Card className="p-4">
-          <b>Would you like to be part of swypejobs.?</b>
-          <p className="text-sm text-muted-foreground">Optional. Last section of the questionnaire, also on its own.</p>
-          <Button className="mt-2" asChild><Link href="/portal/feedback/join">Open</Link></Button>
-        </Card>
+      <div className="grid gap-4 sm:grid-cols-2">
+        {[
+          ["/portal/feedback/pulse", "Weekly pulse survey", `3 minutes. Due ${pilot.pulseDeadline}.`],
+          ["/portal/feedback/bug", "Report a bug", "Words only, no screenshots."],
+          ["/portal/feedback/questionnaire", "Pilot feedback questionnaire", "Week 2: sections A to E. Week 4: all sections. About 25 to 30 minutes."],
+          ["/portal/feedback/join", "Would you like to be part of swypejobs.?", "Optional. Last section of the questionnaire, also on its own."],
+        ].map(([href, title, copy]) => (
+          <Card key={href} className="flex h-full flex-col p-5">
+            <p className="font-semibold">{title}</p>
+            <p className="mt-2 flex-1 text-sm text-muted-foreground">{copy}</p>
+            <Button className="mt-4 w-fit" asChild><Link href={href}>Open</Link></Button>
+          </Card>
+        ))}
       </div>
     </>
   );

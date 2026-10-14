@@ -114,7 +114,7 @@ export default function AdminPage() {
       )}
       {issued ? <p className="font-semibold text-primary">{issued}</p> : null}
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid items-start gap-6 md:grid-cols-3">
         <Card>
           <CardHeader><CardTitle>New invite</CardTitle></CardHeader>
           <CardContent className="space-y-3">

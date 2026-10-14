@@ -16,9 +16,12 @@ export async function POST(request: Request) {
   } | null;
   const pemail = body?.pemail?.trim() ?? "";
   const uemail = body?.uemail?.trim() ?? "";
-  if (!emailOk(pemail) || !emailOk(uemail)) {
+  if (!emailOk(pemail)) {
+    return Response.json({ error: "Enter a valid personal email before sending the code." }, { status: 400 });
+  }
+  if (uemail && !emailOk(uemail)) {
     return Response.json(
-      { error: "Enter a valid personal email and a valid university email before sending the code." },
+      { error: "University email is optional. Leave it blank, or enter a valid address." },
       { status: 400 },
     );
   }
@@ -50,7 +53,7 @@ export async function POST(request: Request) {
   if ("locked" in saved) return Response.json({ error: "This agreement is already signed." }, { status: 400 });
 
   const mailed = await sendMail({
-    to: Array.from(new Set([pemail, uemail])),
+    to: Array.from(new Set([pemail, uemail].filter(emailOk))),
     subject: "Your swypejobs. pilot verification code",
     text: otpMessage(code),
   });

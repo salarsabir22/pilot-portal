@@ -4,9 +4,15 @@ import Link from "next/link";
 import { useState } from "react";
 import { usePilot } from "@/components/pilot-context";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent } from "@/components/ui/card";
 import { RULES, WEEKS } from "@/lib/types";
+
+const weeklyTime = [
+  ["3 hours", "Testing sessions"],
+  ["1 hour", "Guided missions"],
+  ["30 min", "Pulse and notes"],
+  ["30 min", "Check-in or interview"],
+];
 
 export default function TestPage() {
   const { participant, ready } = usePilot();
@@ -27,25 +33,23 @@ export default function TestPage() {
           </Button>
         ))}
       </div>
-      <Card className="p-4">
-        <b>Week {current.week}: {current.theme}</b>
-        <p className="mt-2">{current.missions}</p>
+      <Card>
+        <CardContent className="p-5 pt-5 sm:p-5 sm:pt-5">
+          <p className="font-semibold">Week {current.week}: {current.theme}</p>
+          <p className="mt-2">{current.missions}</p>
+        </CardContent>
       </Card>
       <h2>Time budget</h2>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Activity</TableHead>
-            <TableHead className="text-right">Time</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          <TableRow><TableCell>Testing sessions</TableCell><TableCell className="text-right font-medium tabular-nums">3 hours</TableCell></TableRow>
-          <TableRow><TableCell>Guided missions</TableCell><TableCell className="text-right font-medium tabular-nums">1 hour</TableCell></TableRow>
-          <TableRow><TableCell>Weekly pulse and written notes</TableCell><TableCell className="text-right font-medium tabular-nums">30 minutes</TableCell></TableRow>
-          <TableRow><TableCell>Check-in call or interview</TableCell><TableCell className="text-right font-medium tabular-nums">30 minutes</TableCell></TableRow>
-        </TableBody>
-      </Table>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {weeklyTime.map(([time, label]) => (
+          <Card key={label}>
+            <CardContent className="p-5 pt-5 sm:p-5 sm:pt-5">
+              <p className="text-2xl font-extrabold tracking-tight">{time}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{label}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
       <h2>What not to do</h2>
       <ul>
         {RULES.slice(0, 4).map((rule) => (

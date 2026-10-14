@@ -10,7 +10,7 @@ const items = [
   ["Can I say no to some things?", "Yes. The optional boxes (recordings, quotes, showing your profile to employers, future contact, and a public name) can all be refused. You can still take part."],
   ["Can I withdraw?", `Yes. Email ${pilot.contactEmail}. Your confidentiality duties under the NDA continue after you leave.`],
   ["Why can’t I send screenshots?", "A screenshot is a copy of something that is not public. Describe bugs in words. We can find them from the time and the screen name, and your activity is logged."],
-  ["Will my name appear in the product?", "Yes. After you sign in, your name and participant ID are watermarked on the portal, and the same approach is used inside the product. That is in the consent form."],
+  ["Will my name appear in the product?", "Yes. Your name and participant ID can be watermarked inside the product. That is in the consent form. This portal does not show a watermark."],
   ["What happens at the end?", "You finish the full questionnaire and a short interview. We revoke logins, keep data only for the periods above, and tell you what we learned."],
 ];
 

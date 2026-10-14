@@ -86,7 +86,7 @@ export default function AccessPage() {
           <li key={rule}>{rule}</li>
         ))}
       </ol>
-      <p className="text-sm text-muted-foreground">Your name appears as a watermark inside the portal and your activity is logged, as described in the consent form you signed.</p>
+      <p className="text-sm text-muted-foreground">Your activity is logged, as described in the consent form you signed.</p>
       <Label className="mt-3 flex items-start gap-3 font-normal">
         <Checkbox checked={rules} onCheckedChange={(value) => setRules(value === true)} className="mt-0.5" />
         I have read the rules.

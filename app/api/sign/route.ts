@@ -65,7 +65,7 @@ export async function POST(request: Request) {
 
     const now = new Date().toISOString();
     participant.identity = checked.identity;
-    participant.cnicEnc = encrypt(checked.cnic);
+    participant.cnicEnc = checked.cnic ? encrypt(checked.cnic) : undefined;
     participant.consents = { required, optional };
     participant.audit = {
       signedAt: now,

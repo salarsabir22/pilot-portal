@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { pilot } from "@/lib/config";
 import { consentBlocks, ndaBlocks } from "@/lib/documents";
@@ -83,7 +84,9 @@ export default function AgreementsPage() {
         pemail: form.pemail,
         uemail: form.uemail,
       });
-      setOtpNote("A 6-digit code was emailed to both addresses. It expires in 10 minutes.");
+      setOtpNote(form.uemail?.trim()
+        ? "A 6-digit code was emailed to both addresses. It expires in 10 minutes."
+        : "A 6-digit code was emailed to your personal address. It expires in 10 minutes.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not send the code.");
     } finally {
@@ -185,11 +188,11 @@ export default function AgreementsPage() {
 
       <fieldset className="space-y-6" disabled={!scrolled}>
         <h2>2. Your details</h2>
-        <div className="grid gap-x-4 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2">
           {IDENTITY_FIELDS.slice(0, 2).map((field) => (
             <Field key={field.key} id={field.key} label={field.label} value={form[field.key] || ""} onChange={(value) => setForm({ ...form, [field.key]: value })} />
           ))}
-          <Field id="cnic" label="CNIC number (XXXXX-XXXXXXX-X)" value={form.cnic || ""} onChange={(value) => setForm({ ...form, cnic: value })} />
+          <Field id="cnic" label="CNIC number (optional)" value={form.cnic || ""} onChange={(value) => setForm({ ...form, cnic: value })} />
           {IDENTITY_FIELDS.slice(2).map((field) => (
             <Field key={field.key} id={field.key} label={field.label} value={form[field.key] || ""} onChange={(value) => setForm({ ...form, [field.key]: value })} />
           ))}
@@ -224,16 +227,14 @@ export default function AgreementsPage() {
         ))}
 
         <h2>4. Verify and sign</h2>
-        <Label htmlFor="sig">Type your full name to sign</Label>
-        <Input id="sig" value={sig} onChange={(event) => setSig(event.target.value)} autoComplete="name" />
-        <div className="mt-3 flex flex-wrap items-center gap-3">
+        <Field id="sig" label="Type your full name to sign" value={sig} onChange={setSig} autoComplete="name" />
+        <div className="flex flex-wrap items-center gap-3">
           <Button variant="outline" type="button" disabled={busy} onClick={sendOtp}>
             Send one-time password
           </Button>
           <span className="text-sm text-muted-foreground">{otpNote}</span>
         </div>
-        <Label htmlFor="otp" className="mt-3">One-time password</Label>
-        <Input id="otp" inputMode="numeric" maxLength={6} value={otp} onChange={(event) => setOtp(event.target.value)} className="max-w-[200px]" />
+        <Field id="otp" label="One-time password" value={otp} onChange={setOtp} className="max-w-[220px]" inputMode="numeric" maxLength={6} />
         <p className="mt-2 text-sm text-destructive">{error}</p>
         {mismatch ? (
           <Button className="mt-3" type="button" disabled={busy} onClick={() => sign(true)}>
@@ -249,11 +250,45 @@ export default function AgreementsPage() {
   );
 }
 
-function Field({ id, label, value, onChange }: { id: string; label: string; value: string; onChange: (value: string) => void }) {
+const longFields = new Set(["addr", "res", "ref"]);
+
+function Field({
+  id,
+  label,
+  value,
+  onChange,
+  className,
+  autoComplete,
+  inputMode,
+  maxLength,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  className?: string;
+  autoComplete?: string;
+  inputMode?: "numeric" | "text" | "tel" | "email";
+  maxLength?: number;
+}) {
+  const type = id === "pemail" || id === "uemail" ? "email" : id === "mobile" ? "tel" : "text";
   return (
-    <div className="space-y-2">
+    <div className={longFields.has(id) ? "space-y-2 md:col-span-2" : "space-y-2"}>
       <Label htmlFor={id}>{label}</Label>
-      <Input id={id} value={value} onChange={(event) => onChange(event.target.value)} />
+      {longFields.has(id) ? (
+        <Textarea id={id} rows={3} value={value} onChange={(event) => onChange(event.target.value)} />
+      ) : (
+        <Input
+          id={id}
+          type={type}
+          value={value}
+          autoComplete={autoComplete}
+          inputMode={inputMode}
+          maxLength={maxLength}
+          className={className}
+          onChange={(event) => onChange(event.target.value)}
+        />
+      )}
     </div>
   );
 }
