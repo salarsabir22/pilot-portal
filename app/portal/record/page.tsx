@@ -4,7 +4,7 @@ import Link from "next/link";
 import { OPTIONAL_CONSENTS, REQUIRED_CONSENTS } from "@/lib/types";
 import { usePilot } from "@/components/pilot-context";
 import { Button } from "@/components/ui/button";
-import { Table, TableCell, TableHead, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export default function RecordPage() {
   const { participant, ready } = usePilot();
@@ -38,11 +38,20 @@ export default function RecordPage() {
       <h1>Signed record</h1>
       <p className="text-sm text-muted-foreground">This is the copy stored with your signature. Print it if you want a paper copy. The CNIC is masked here.</p>
       <Table>
-        <tbody>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Field</TableHead>
+            <TableHead>Recorded value</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {rows.map(([label, value]) => (
-            <TableRow key={label}><TableHead>{label}</TableHead><TableCell>{value}</TableCell></TableRow>
+            <TableRow key={label}>
+              <TableCell className="w-44 font-medium text-muted-foreground">{label}</TableCell>
+              <TableCell>{value}</TableCell>
+            </TableRow>
           ))}
-        </tbody>
+        </TableBody>
       </Table>
       <h2>Required consents</h2>
       <ul>

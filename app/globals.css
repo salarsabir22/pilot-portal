@@ -76,18 +76,19 @@ body {
   font-family: var(--font-sans);
 }
 
-h1 { margin: 0 0 0.5rem; font-size: 1.875rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.15; }
-h2 { margin: 1.5rem 0 0.5rem; font-size: 1.15rem; font-weight: 700; }
-p { margin: 0 0 0.75rem; }
+h1 { margin: 0 0 0.75rem; font-size: 2rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.15; }
+h2 { margin: 2rem 0 0.75rem; font-size: 1.2rem; font-weight: 700; }
+p { margin: 0; line-height: 1.6; }
 
 .doc {
-  height: 280px;
+  height: 28rem;
   overflow: auto;
   border: 1px solid var(--border);
-  border-radius: 0.75rem;
-  padding: 0.75rem 0.9rem;
+  border-radius: 1rem;
+  padding: 1.25rem 1.35rem;
   background: var(--muted);
-  font-size: 0.875rem;
+  font-size: 0.95rem;
+  line-height: 1.65;
 }
 
 .doc ul {
@@ -95,19 +96,7 @@ p { margin: 0 0 0.75rem; }
   padding-left: 1.1rem;
 }
 
-.doc table, .scroll table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.doc th, .doc td, .scroll th, .scroll td {
-  border-bottom: 1px solid var(--border);
-  text-align: left;
-  padding: 0.4rem 0.3rem;
-  vertical-align: top;
-}
-
-.scroll { overflow-x: auto; }
+.doc h3 { margin: 1.25rem 0 0.4rem; font-size: 1rem; }
 
 .watermark {
   position: fixed;

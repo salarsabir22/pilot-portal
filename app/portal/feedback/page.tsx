@@ -26,7 +26,7 @@ export default function FeedbackHub() {
         {" "}End-of-pilot questionnaire: {end === "submitted" ? "submitted" : end === "draft" ? "in progress" : "not started"}.
         {" "}Join swypejobs.: {participant.join ? participant.join.interest : "not answered"}.
       </p>
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-5 sm:grid-cols-2">
         <Card className="p-4">
           <b>Weekly pulse survey</b>
           <p className="text-sm text-muted-foreground">3 minutes. Due {pilot.pulseDeadline}.</p>

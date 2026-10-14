@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { api } from "@/components/pilot-context";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Table, TableCell, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 type Row = {
   id: string;
@@ -81,12 +81,12 @@ export default function AdminPage() {
 
   if (!authed) {
     return (
-      <div className="mx-auto max-w-md px-5 py-8">
+      <div className="mx-auto max-w-md px-6 py-16">
         <Card>
           <CardHeader>
             <CardTitle className="text-3xl font-extrabold">Founder view</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-5">
             <p className="text-sm text-muted-foreground">Approval queue, credentials, and feedback. Students never see this page’s contents.</p>
             <Label htmlFor="password">Founder password</Label>
             <Input id="password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
@@ -102,7 +102,7 @@ export default function AdminPage() {
   const active = rows.filter((row) => row.status === "active").length;
 
   return (
-    <div className="mx-auto max-w-5xl space-y-4 px-5 py-8">
+    <div className="mx-auto max-w-5xl space-y-8 px-6 py-12 md:py-16">
       <h1>Founder view</h1>
       <p className="text-sm text-muted-foreground">{rows.length} participants · {signed} waiting for approval · {active} signed in</p>
       {delivery.email ? (
@@ -114,7 +114,7 @@ export default function AdminPage() {
       )}
       {issued ? <p className="font-semibold text-primary">{issued}</p> : null}
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-3">
         <Card>
           <CardHeader><CardTitle>New invite</CardTitle></CardHeader>
           <CardContent className="space-y-3">
@@ -139,69 +139,102 @@ export default function AdminPage() {
       </div>
 
       <h2>Invites</h2>
-      <Card>
-        <Table>
-          <tbody>
-            {invites.map((invite) => (
-              <TableRow key={invite.code}>
-                <TableCell><code>{invite.code}</code></TableCell>
-                <TableCell>{invite.participantId || "unused"}</TableCell>
-                <TableCell>{invite.note}</TableCell>
-              </TableRow>
-            ))}
-          </tbody>
-        </Table>
-      </Card>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Code</TableHead>
+            <TableHead>Student</TableHead>
+            <TableHead>Note</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {invites.map((invite) => (
+            <TableRow key={invite.code}>
+              <TableCell><code>{invite.code}</code></TableCell>
+              <TableCell>{invite.participantId || "Unused"}</TableCell>
+              <TableCell>{invite.note}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
 
       <h2>Participants</h2>
-      {rows.map((row) => (
-        <Card key={row.id}>
-          <CardContent className="space-y-3 pt-6">
-            <div className="flex flex-wrap items-center gap-2">
-              <strong>{row.identity?.name || "Not signed"} · {row.id}</strong>
-              <Badge>{row.status} · {row.inviteCode}</Badge>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Pulses {row.pulses.length}/4 · Bugs {row.bugs.length} · Questionnaires {row.questionnaires.map((item) => `${item.mode}:${item.status}`).join(", ") || "none"}
-              {row.join ? ` · Join: ${row.join.interest}` : ""}
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {row.status === "signed" ? <Button type="button" onClick={() => act("approve", row.id)}>Check details, countersign and approve</Button> : null}
-              {row.status !== "revoked" && row.status !== "invited" ? <Button variant="outline" type="button" onClick={() => act("revoke", row.id)}>Revoke</Button> : null}
-              <Button variant="outline" type="button" onClick={() => setOpen(open === row.id ? null : row.id)}>Details</Button>
-            </div>
-            {open === row.id && row.identity ? (
-              <div className="space-y-2 rounded-2xl bg-secondary p-4 text-sm">
-                <p>CNIC: <b>{row.cnic}</b></p>
-                <p>{row.identity.uni} · {row.identity.sid} · {row.identity.dob}</p>
-                <p>{row.identity.mobile}<br />{row.identity.pemail}<br />{row.identity.uemail}</p>
-                {row.audit ? <p className="text-muted-foreground">Signed {row.audit.signedAt} from {row.audit.ip}. {row.audit.documentVersion}. Name mismatch: {row.audit.nameMismatch ? "yes" : "no"}.</p> : null}
-                {row.tempPassword ? <p>Temporary password: <code className="font-bold">{row.tempPassword}</code> {row.credentialsEmailed ? "(emailed)" : ""}</p> : null}
-                {row.pulses.map((pulse) => (
-                  <p key={pulse.week}>Week {pulse.week}: {pulse.disappointed}. Fix first: {pulse.fixFirst}</p>
-                ))}
-                {row.bugs.map((bug) => (
-                  <p key={bug.submittedAt}>Bug on {bug.screen}: {bug.actual}</p>
-                ))}
-                {row.join ? <p>Join note: {row.join.why} · {row.join.hours}</p> : null}
-              </div>
-            ) : null}
-          </CardContent>
-        </Card>
-      ))}
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Student</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead className="text-right">Pulses</TableHead>
+            <TableHead className="text-right">Bugs</TableHead>
+            <TableHead>Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {rows.map((row) => (
+            <Fragment key={row.id}>
+              <TableRow>
+                <TableCell>
+                  <div className="font-medium">{row.identity?.name || "Not signed"}</div>
+                  <div className="text-muted-foreground">{row.id} · {row.inviteCode}</div>
+                </TableCell>
+                <TableCell><Badge>{row.status}</Badge></TableCell>
+                <TableCell className="text-right tabular-nums">{row.pulses.length}/4</TableCell>
+                <TableCell className="text-right tabular-nums">{row.bugs.length}</TableCell>
+                <TableCell>
+                  <div className="flex flex-wrap gap-2">
+                    {row.status === "signed" ? <Button size="sm" type="button" onClick={() => act("approve", row.id)}>Approve</Button> : null}
+                    {row.status !== "revoked" && row.status !== "invited" ? <Button size="sm" variant="outline" type="button" onClick={() => act("revoke", row.id)}>Revoke</Button> : null}
+                    <Button size="sm" variant="outline" type="button" onClick={() => setOpen(open === row.id ? null : row.id)}>Details</Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+              {open === row.id && row.identity ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="bg-muted/50">
+                    <div className="space-y-2">
+                      <p>CNIC: <b>{row.cnic}</b></p>
+                      <p>{row.identity.uni} · {row.identity.sid} · {row.identity.dob}</p>
+                      <p>{row.identity.mobile}<br />{row.identity.pemail}<br />{row.identity.uemail}</p>
+                      <p className="text-muted-foreground">
+                        Questionnaires {row.questionnaires.map((item) => `${item.mode}:${item.status}`).join(", ") || "none"}
+                        {row.join ? ` · Join: ${row.join.interest}` : ""}
+                      </p>
+                      {row.audit ? <p className="text-muted-foreground">Signed {row.audit.signedAt} from {row.audit.ip}. {row.audit.documentVersion}. Name mismatch: {row.audit.nameMismatch ? "yes" : "no"}.</p> : null}
+                      {row.tempPassword ? <p>Temporary password: <code className="font-bold">{row.tempPassword}</code> {row.credentialsEmailed ? "(emailed)" : ""}</p> : null}
+                      {row.pulses.map((pulse) => (
+                        <p key={pulse.week}>Week {pulse.week}: {pulse.disappointed}. Fix first: {pulse.fixFirst}</p>
+                      ))}
+                      {row.bugs.map((bug) => (
+                        <p key={bug.submittedAt}>Bug on {bug.screen}: {bug.actual}</p>
+                      ))}
+                      {row.join ? <p>Join note: {row.join.why} · {row.join.hours}</p> : null}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : null}
+            </Fragment>
+          ))}
+        </TableBody>
+      </Table>
 
       <Card>
         <CardHeader><CardTitle>Interview guide (45 minutes)</CardTitle></CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">Tell them you will take notes, that recording needs the consent they already gave, and that you want the honest version. Ask open questions. Do not defend the product.</p>
           <Table>
-            <tbody>
-              <TableRow><TableCell>0 to 5 min</TableCell><TableCell>Warm-up. “Tell me about your job search so far.”</TableCell></TableRow>
-              <TableRow><TableCell>5 to 20 min</TableCell><TableCell>Their story. Pick two or three questionnaire answers and ask what happened last time.</TableCell></TableRow>
-              <TableRow><TableCell>20 to 35 min</TableCell><TableCell>Walk-through. Ask how they would find and act on a job today. Do not guide them.</TableCell></TableRow>
-              <TableRow><TableCell>35 to 42 min</TableCell><TableCell>“If we could only build one thing next, what should it be, and what would you give up for it?”</TableCell></TableRow>
-              <TableRow><TableCell>42 to 45 min</TableCell><TableCell>Ask who else you should talk to. Thank them. Reply to every yes or maybe within a week.</TableCell></TableRow>
-            </tbody>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Time</TableHead>
+                <TableHead>What to cover</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow><TableCell className="whitespace-nowrap font-medium">0 to 5 min</TableCell><TableCell>Warm-up. “Tell me about your job search so far.”</TableCell></TableRow>
+              <TableRow><TableCell className="whitespace-nowrap font-medium">5 to 20 min</TableCell><TableCell>Their story. Pick two or three questionnaire answers and ask what happened last time.</TableCell></TableRow>
+              <TableRow><TableCell className="whitespace-nowrap font-medium">20 to 35 min</TableCell><TableCell>Walk-through. Ask how they would find and act on a job today. Do not guide them.</TableCell></TableRow>
+              <TableRow><TableCell className="whitespace-nowrap font-medium">35 to 42 min</TableCell><TableCell>“If we could only build one thing next, what should it be, and what would you give up for it?”</TableCell></TableRow>
+              <TableRow><TableCell className="whitespace-nowrap font-medium">42 to 45 min</TableCell><TableCell>Ask who else you should talk to. Thank them. Reply to every yes or maybe within a week.</TableCell></TableRow>
+            </TableBody>
           </Table>
         </CardContent>
       </Card>

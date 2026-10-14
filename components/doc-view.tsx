@@ -1,4 +1,5 @@
 import type { DocBlock } from "@/lib/documents";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export function DocView({ blocks }: { blocks: DocBlock[] }) {
   return (
@@ -16,25 +17,25 @@ export function DocView({ blocks }: { blocks: DocBlock[] }) {
         }
         if (block.type === "table") {
           return (
-            <div className="scroll" key={index}>
-              <table>
-                <thead>
-                  <tr>
-                    {block.headers.map((header) => (
-                      <th key={header}>{header}</th>
+            <div className="my-4" key={index}>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    {block.headers.map((header, headerIndex) => (
+                      <TableHead key={`${header}-${headerIndex}`}>{header}</TableHead>
                     ))}
-                  </tr>
-                </thead>
-                <tbody>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {block.rows.map((row) => (
-                    <tr key={row.join("|")}>
-                      {row.map((cell) => (
-                        <td key={cell}>{cell}</td>
+                    <TableRow key={row.join("|")}>
+                      {row.map((cell, cellIndex) => (
+                        <TableCell key={`${cell}-${cellIndex}`}>{cell}</TableCell>
                       ))}
-                    </tr>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
           );
         }

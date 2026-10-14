@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Table, TableCell, TableHead, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { pilot } from "@/lib/config";
 import { consentBlocks, ndaBlocks } from "@/lib/documents";
 import {
@@ -137,19 +137,25 @@ export default function AgreementsPage() {
         <p className="font-semibold text-primary">The founders countersigned. You can continue to access.</p>
         )}
         <Table>
-            <tbody>
-              <TableRow><TableHead>Participant</TableHead><TableCell>{participant.identity?.name} ({participant.id})</TableCell></TableRow>
-              <TableRow><TableHead>CNIC</TableHead><TableCell>{participant.cnicMasked}</TableCell></TableRow>
-              <TableRow><TableHead>Signed at</TableHead><TableCell>{participant.audit.signedAt}</TableCell></TableRow>
-              <TableRow><TableHead>IP address</TableHead><TableCell>{participant.audit.ip}</TableCell></TableRow>
-              <TableRow><TableHead>Document</TableHead><TableCell>{participant.audit.documentVersion}</TableCell></TableRow>
-              <TableRow><TableHead>Document hash</TableHead><TableCell><code>{participant.audit.documentHash.slice(0, 16)}</code></TableCell></TableRow>
-              <TableRow><TableHead>OTP</TableHead><TableCell>Confirmed by email</TableCell></TableRow>
-              {participant.audit.countersignedAt ? (
-                <TableRow><TableHead>Countersigned</TableHead><TableCell>{participant.audit.countersignedBy} · {participant.audit.countersignedAt}</TableCell></TableRow>
-              ) : null}
-            </tbody>
-          </Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Field</TableHead>
+              <TableHead>Recorded value</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow><TableCell className="w-40 font-medium text-muted-foreground">Participant</TableCell><TableCell>{participant.identity?.name} ({participant.id})</TableCell></TableRow>
+            <TableRow><TableCell className="font-medium text-muted-foreground">CNIC</TableCell><TableCell>{participant.cnicMasked}</TableCell></TableRow>
+            <TableRow><TableCell className="font-medium text-muted-foreground">Signed at</TableCell><TableCell>{participant.audit.signedAt}</TableCell></TableRow>
+            <TableRow><TableCell className="font-medium text-muted-foreground">IP address</TableCell><TableCell>{participant.audit.ip}</TableCell></TableRow>
+            <TableRow><TableCell className="font-medium text-muted-foreground">Document</TableCell><TableCell>{participant.audit.documentVersion}</TableCell></TableRow>
+            <TableRow><TableCell className="font-medium text-muted-foreground">Document hash</TableCell><TableCell><code>{participant.audit.documentHash.slice(0, 16)}</code></TableCell></TableRow>
+            <TableRow><TableCell className="font-medium text-muted-foreground">OTP</TableCell><TableCell>Confirmed by email</TableCell></TableRow>
+            {participant.audit.countersignedAt ? (
+              <TableRow><TableCell className="font-medium text-muted-foreground">Countersigned</TableCell><TableCell>{participant.audit.countersignedBy} · {participant.audit.countersignedAt}</TableCell></TableRow>
+            ) : null}
+          </TableBody>
+        </Table>
         <div className="mt-4 flex flex-wrap gap-2">
           <Button asChild><Link href="/portal/record">View the signed record</Link></Button>
           {participant.status === "approved" || participant.status === "active" ? (
@@ -177,7 +183,7 @@ export default function AgreementsPage() {
       </div>
       <p className="text-sm text-muted-foreground">{scrolled ? <span className="font-semibold text-primary">Read to the end.</span> : "Scroll to the end to continue."}</p>
 
-      <fieldset disabled={!scrolled}>
+      <fieldset className="space-y-6" disabled={!scrolled}>
         <h2>2. Your details</h2>
         <div className="grid gap-x-4 md:grid-cols-2">
           {IDENTITY_FIELDS.slice(0, 2).map((field) => (

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { usePilot } from "@/components/pilot-context";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Table, TableCell, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { RULES, WEEKS } from "@/lib/types";
 
 export default function TestPage() {
@@ -33,12 +33,18 @@ export default function TestPage() {
       </Card>
       <h2>Time budget</h2>
       <Table>
-        <tbody>
-          <TableRow><TableCell>Testing sessions</TableCell><TableCell>3 hours</TableCell></TableRow>
-          <TableRow><TableCell>Guided missions</TableCell><TableCell>1 hour</TableCell></TableRow>
-          <TableRow><TableCell>Weekly pulse and written notes</TableCell><TableCell>30 minutes</TableCell></TableRow>
-          <TableRow><TableCell>Check-in call or interview</TableCell><TableCell>30 minutes</TableCell></TableRow>
-        </tbody>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Activity</TableHead>
+            <TableHead className="text-right">Time</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow><TableCell>Testing sessions</TableCell><TableCell className="text-right font-medium tabular-nums">3 hours</TableCell></TableRow>
+          <TableRow><TableCell>Guided missions</TableCell><TableCell className="text-right font-medium tabular-nums">1 hour</TableCell></TableRow>
+          <TableRow><TableCell>Weekly pulse and written notes</TableCell><TableCell className="text-right font-medium tabular-nums">30 minutes</TableCell></TableRow>
+          <TableRow><TableCell>Check-in call or interview</TableCell><TableCell className="text-right font-medium tabular-nums">30 minutes</TableCell></TableRow>
+        </TableBody>
       </Table>
       <h2>What not to do</h2>
       <ul>

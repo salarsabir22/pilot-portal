@@ -16,7 +16,7 @@ const items = [
 
 export default function FaqPage() {
   return (
-    <div className="mx-auto max-w-3xl space-y-3 px-5 py-8">
+    <div className="mx-auto max-w-3xl space-y-5 px-6 py-12 md:py-16">
       <h1>FAQ</h1>
       <p className="text-sm text-muted-foreground">Questions about the agreement, your data, the time, and what happens next.</p>
       {items.map(([title, body]) => (

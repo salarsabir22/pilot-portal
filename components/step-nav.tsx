@@ -36,7 +36,7 @@ export function StepNav() {
 
   return (
     <nav aria-label="Pilot steps">
-      <ol className="flex gap-2 overflow-x-auto md:flex-col">
+      <ol className="flex gap-3 overflow-x-auto pb-1 md:flex-col md:pb-0">
         {STEPS.map((step) => {
           const open = unlocked(step.id);
           const current = pathname === step.href || (step.id === "feedback" && pathname.startsWith("/portal/feedback"));
@@ -47,7 +47,7 @@ export function StepNav() {
                 aria-current={current ? "step" : undefined}
                 aria-disabled={!open}
                 className={cn(
-                  "flex items-center gap-2 whitespace-nowrap rounded-xl border border-border bg-card px-3 py-2.5 text-sm",
+                  "flex items-center gap-3 whitespace-nowrap rounded-2xl border border-border bg-card px-4 py-3 text-sm",
                   current && "border-primary font-semibold shadow-[inset_3px_0_0_var(--primary)]",
                   !open && "pointer-events-none opacity-50",
                 )}

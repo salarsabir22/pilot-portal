@@ -29,22 +29,24 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-3 border-b border-border bg-card px-5 py-3">
-      <Link href="/" className="text-[22px] font-extrabold tracking-tight">
-        swypejobs<span className="text-primary">.</span> <span className="text-sm font-normal text-muted-foreground">pilot</span>
-      </Link>
-      <div className="flex flex-wrap items-center gap-2">
-        <Button variant="outline" size="sm" asChild><Link href="/faq">FAQ</Link></Button>
-        <Button variant="outline" size="sm" asChild><Link href="/help">Help</Link></Button>
-        <Button variant="outline" size="sm" asChild><Link href="/admin">Founder</Link></Button>
-        <Button variant="secondary" size="sm" type="button" aria-pressed={dark} onClick={toggleTheme}>
-          {dark ? "Light" : "Dark"}
-        </Button>
-        {participant ? (
-          <Button variant="ghost" size="sm" type="button" onClick={signOut}>
-            {participant.id} · Sign out
-          </Button>
-        ) : null}
+    <header className="sticky top-0 z-20 border-b border-border bg-card/95 backdrop-blur">
+      <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-6 px-6">
+        <Link href="/" className="text-xl font-extrabold tracking-tight">
+          swypejobs<span className="text-primary">.</span>
+          <span className="ml-2 text-sm font-medium text-muted-foreground">pilot</span>
+        </Link>
+        <nav className="flex items-center gap-6 text-sm" aria-label="Site">
+          <Link href="/faq" className="text-muted-foreground hover:text-foreground">FAQ</Link>
+          <Link href="/help" className="text-muted-foreground hover:text-foreground">Help</Link>
+          <button type="button" className="text-muted-foreground hover:text-foreground" aria-pressed={dark} onClick={toggleTheme}>
+            {dark ? "Light" : "Dark"}
+          </button>
+          {participant ? (
+            <Button variant="outline" size="sm" type="button" onClick={signOut}>
+              Sign out
+            </Button>
+          ) : null}
+        </nav>
       </div>
     </header>
   );

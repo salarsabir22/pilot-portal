@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { PilotProvider } from "@/components/pilot-context";
 
@@ -19,10 +20,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
         <meta name="robots" content="noindex, nofollow" />
       </head>
-      <body className="min-h-screen bg-background text-foreground antialiased">
+      <body className="flex min-h-screen flex-col bg-background text-foreground antialiased">
         <PilotProvider>
           <Header />
-          {children}
+          <div className="flex-1">{children}</div>
+          <Footer />
         </PilotProvider>
       </body>
     </html>
