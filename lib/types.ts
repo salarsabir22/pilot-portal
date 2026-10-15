@@ -153,7 +153,7 @@ export type PublicParticipant = {
 export const IDENTITY_FIELDS: { key: keyof Identity; label: string }[] = [
   { key: "name", label: "Full name" },
   { key: "father", label: "Father’s / husband’s name (optional)" },
-  { key: "dob", label: "Date of birth (optional)" },
+  { key: "dob", label: "Date of birth" },
   { key: "mobile", label: "Mobile number" },
   { key: "pemail", label: "Personal email" },
   { key: "uemail", label: "University email (optional)" },

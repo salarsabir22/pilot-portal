@@ -23,7 +23,7 @@ export async function POST(request: Request) {
   if (!id) return Response.json({ error: "Open your invite first." }, { status: 401 });
   const body = (await request.json().catch(() => null)) as Body | null;
   const checked = validateIdentity(body?.identity ?? {}, !!body?.adult);
-  if ("error" in checked) return Response.json({ error: checked.error }, { status: 400 });
+  if (!checked.ok) return Response.json({ error: checked.error }, { status: 400 });
 
   const required = body?.consents?.required ?? [];
   const optional = body?.consents?.optional ?? [];

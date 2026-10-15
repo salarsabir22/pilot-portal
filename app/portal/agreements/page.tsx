@@ -20,6 +20,7 @@ import {
   type Identity,
   type PublicParticipant,
 } from "@/lib/types";
+import { formatCnic, validateIdentity } from "@/lib/validate";
 
 const draftKey = "sj-agreement-draft";
 
@@ -96,6 +97,11 @@ export default function AgreementsPage() {
 
   async function sign(acknowledgeMismatch = false) {
     setError("");
+    const checked = validateIdentity({ ...form, cnic: form.cnic }, adult);
+    if (!checked.ok) {
+      setError(checked.error);
+      return;
+    }
     setBusy(true);
     try {
       const identity = Object.fromEntries(IDENTITY_FIELDS.map((field) => [field.key, form[field.key] || ""])) as Identity;
@@ -190,11 +196,27 @@ export default function AgreementsPage() {
         <h2>2. Your details</h2>
         <div className="grid gap-4 md:grid-cols-2">
           {IDENTITY_FIELDS.slice(0, 2).map((field) => (
-            <Field key={field.key} id={field.key} label={field.label} value={form[field.key] || ""} onChange={(value) => setForm({ ...form, [field.key]: value })} />
+            <Field key={field.key} id={field.key} label={field.label} value={form[field.key] || ""} onChange={(value) => setForm({ ...form, [field.key]: value })} required={field.key === "name"} />
           ))}
-          <Field id="cnic" label="CNIC number (optional)" value={form.cnic || ""} onChange={(value) => setForm({ ...form, cnic: value })} />
+          <Field
+            id="cnic"
+            label="CNIC number"
+            value={form.cnic || ""}
+            onChange={(value) => setForm({ ...form, cnic: formatCnic(value) })}
+            inputMode="numeric"
+            maxLength={15}
+            placeholder="35202-1234567-1"
+            required
+          />
           {IDENTITY_FIELDS.slice(2).map((field) => (
-            <Field key={field.key} id={field.key} label={field.label} value={form[field.key] || ""} onChange={(value) => setForm({ ...form, [field.key]: value })} />
+            <Field
+              key={field.key}
+              id={field.key}
+              label={field.label}
+              value={form[field.key] || ""}
+              onChange={(value) => setForm({ ...form, [field.key]: value })}
+              required={field.key === "dob" || field.key === "mobile" || field.key === "pemail"}
+            />
           ))}
         </div>
         <Label className="mt-3 flex items-start gap-3 font-normal">
@@ -261,6 +283,8 @@ function Field({
   autoComplete,
   inputMode,
   maxLength,
+  placeholder,
+  required,
 }: {
   id: string;
   label: string;
@@ -270,8 +294,10 @@ function Field({
   autoComplete?: string;
   inputMode?: "numeric" | "text" | "tel" | "email";
   maxLength?: number;
+  placeholder?: string;
+  required?: boolean;
 }) {
-  const type = id === "pemail" || id === "uemail" ? "email" : id === "mobile" ? "tel" : "text";
+  const type = id === "dob" ? "date" : id === "pemail" || id === "uemail" ? "email" : id === "mobile" ? "tel" : "text";
   return (
     <div className={longFields.has(id) ? "space-y-2 md:col-span-2" : "space-y-2"}>
       <Label htmlFor={id}>{label}</Label>
@@ -282,9 +308,11 @@ function Field({
           id={id}
           type={type}
           value={value}
-          autoComplete={autoComplete}
+          autoComplete={autoComplete || (id === "dob" ? "bday" : undefined)}
           inputMode={inputMode}
           maxLength={maxLength}
+          placeholder={placeholder}
+          required={required}
           className={className}
           onChange={(event) => onChange(event.target.value)}
         />
