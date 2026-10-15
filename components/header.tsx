@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { api, usePilot } from "./pilot-context";
 
 export function Header() {
-  const { participant, setParticipant } = usePilot();
+  const { participant } = usePilot();
   const [dark, setDark] = useState(false);
+  const [leaving, setLeaving] = useState(false);
 
   useEffect(() => {
     const next = localStorage.getItem("sj-theme") === "dark";
@@ -23,9 +24,14 @@ export function Header() {
   }
 
   async function signOut() {
-    await api("/api/logout", {});
-    setParticipant(null);
-    window.location.href = "/";
+    if (leaving) return;
+    setLeaving(true);
+    try {
+      await api("/api/logout", {});
+      window.location.replace("/");
+    } catch {
+      setLeaving(false);
+    }
   }
 
   return (
@@ -42,8 +48,8 @@ export function Header() {
             {dark ? "Light" : "Dark"}
           </button>
           {participant ? (
-            <Button variant="outline" size="sm" type="button" onClick={signOut}>
-              Sign out
+            <Button variant="outline" size="sm" type="button" disabled={leaving} onClick={signOut}>
+              {leaving ? "Signing out…" : "Sign out"}
             </Button>
           ) : null}
         </nav>

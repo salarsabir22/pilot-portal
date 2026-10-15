@@ -36,6 +36,7 @@ export default function AdminPage() {
   const [note, setNote] = useState("");
   const [issued, setIssued] = useState("");
   const [open, setOpen] = useState<string | null>(null);
+  const [leaving, setLeaving] = useState(false);
 
   async function load() {
     const data = await api<{ participants: Row[]; invites: typeof invites; delivery?: { email: boolean } }>("/api/admin");
@@ -60,15 +61,14 @@ export default function AdminPage() {
   }
 
   async function logout() {
+    if (leaving) return;
+    setLeaving(true);
     setError("");
     try {
       await api("/api/admin", { action: "logout" });
-      setAuthed(false);
-      setRows([]);
-      setInvites([]);
-      setIssued("");
-      setPassword("");
+      window.location.replace("/admin");
     } catch (err) {
+      setLeaving(false);
       setError(err instanceof Error ? err.message : "Could not sign out.");
     }
   }
@@ -129,7 +129,7 @@ export default function AdminPage() {
           <h1>Founder view</h1>
           <p className="text-sm text-muted-foreground">{rows.length} participants · {signed} waiting for approval · {active} signed in</p>
         </div>
-        <Button variant="outline" type="button" onClick={logout}>Sign out</Button>
+        <Button variant="outline" type="button" disabled={leaving} onClick={logout}>{leaving ? "Signing out…" : "Sign out"}</Button>
       </div>
       {delivery.email ? (
         <Alert>Verification email is configured. Codes are emailed and are not shown on screen.</Alert>

@@ -1,4 +1,4 @@
-import { pilot } from "./config";
+import { pilot, pilotDates } from "./config";
 
 export type DocBlock =
   | { type: "p"; text: string }
@@ -27,7 +27,7 @@ function breachClause(): DocBlock[] {
   if (pilot.breachOption !== "A") {
     blocks.push(
       p(
-        `9.3 Option B: fixed sum, to be confirmed by your lawyer. Because loss from a leak is hard to measure, the parties agree that PKR ${pilot.fixedSumPkr} is reasonable compensation for each proven breach, being a genuine pre-estimate of loss and not a penalty.`,
+        `9.3 Because loss from a leak is hard to measure, the parties agree that PKR ${pilot.fixedSumPkr} is reasonable compensation for each proven breach, being a genuine pre-estimate of loss and not a penalty.`,
       ),
     );
   }
@@ -63,13 +63,14 @@ function disputeClause(): DocBlock[] {
 }
 
 export function ndaBlocks(participantId: string): DocBlock[] {
+  const dates = pilotDates();
   return [
     p(
       `Agreement ref: ${pilot.agreementRefPrefix}-${participantId.replace("SJ-P-", "")} · Participant ID: ${participantId} · Place: ${pilot.place}`,
     ),
     p("This Non-Disclosure Agreement (the “Agreement”) is made between:"),
     p(
-      `1. ${pilot.companyLegalName}, of ${pilot.officeAddress}, which operates the product known as swypejobs. (“swypejobs.”, “we”, “us”); and`,
+      `1. ${pilot.companyLegalName}, which operates the product known as swypejobs. (“swypejobs.”, “we”, “us”); and`,
     ),
     p("2. The person whose details are given in Part A below (the “Participant”, “you”)."),
     h("Part A. Participant details"),
@@ -79,7 +80,7 @@ export function ndaBlocks(participantId: string): DocBlock[] {
     h("Part B. Terms"),
     h("1. Purpose"),
     p(
-      `swypejobs. is developing a job-matching product for students and early-career talent that is not yet public. We are inviting you to test it and give feedback in a closed pilot from ${pilot.pilotStart} to ${pilot.pilotEnd} (the “Pilot”). To let you do this we will share non-public information with you. In return, you agree to the terms below.`,
+      `swypejobs. is developing a job-matching product for students and early-career talent that is not yet public. We are inviting you to test it and give feedback in a closed pilot from ${dates.start} to ${dates.end} (the “Pilot”). To let you do this we will share non-public information with you. In return, you agree to the terms below.`,
     ),
     h("2. Confidential Information"),
     p(
@@ -143,13 +144,14 @@ export function ndaBlocks(participantId: string): DocBlock[] {
 }
 
 export function consentBlocks(participantId: string): DocBlock[] {
+  const dates = pilotDates();
   return [
     p(
       `Form ref: ${pilot.consentRefPrefix}-${participantId.replace("SJ-P-", "")} · Participant ID: ${participantId}`,
     ),
     h("1. Who we are"),
     p(
-      `swypejobs. (operated by ${pilot.companyLegalName}, ${pilot.officeAddress}) is building a job-matching product for students and early-career talent. We are running a closed pilot with a small group of students from ${pilot.pilotStart} to ${pilot.pilotEnd} (the “Pilot”). This form explains what the Pilot involves, what personal data we collect and why, and asks for your consent. Please read it fully. You can ask us anything before you sign.`,
+      `swypejobs. (operated by ${pilot.companyLegalName}) is building a job-matching product for students and early-career talent. We are running a closed pilot with a small group of students from ${dates.start} to ${dates.end} (the “Pilot”). This form explains what the Pilot involves, what personal data we collect and why, and asks for your consent. Please read it fully. You can ask us anything before you sign.`,
     ),
     h("2. Your details"),
     p(
@@ -220,7 +222,7 @@ export function consentBlocks(participantId: string): DocBlock[] {
     ]),
     h("6. Your rights"),
     p(
-      `You may ask to see the personal data we hold about you, to correct it, or to ask us to delete it (we may need to keep identity details for the period above). You may withdraw any optional consent at any time. Contact: ${pilot.contactName}, ${pilot.contactEmail}, ${pilot.whatsapp}. If we cannot resolve a concern, you may complain to the relevant authority under Pakistani law.`,
+      `You may ask to see the personal data we hold about you, to correct it, or to ask us to delete it (we may need to keep identity details for the period above). You may withdraw any optional consent at any time. Contact: ${pilot.contactName}, ${pilot.contactEmail}. If we cannot resolve a concern, you may complain to the relevant authority under Pakistani law.`,
     ),
     h("7. Your consent"),
     p(

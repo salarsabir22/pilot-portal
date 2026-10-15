@@ -1,14 +1,10 @@
 export const pilot = {
   brand: "swypejobs.",
-  companyLegalName: "[Registered legal name of the company, or names of the founders]",
-  officeAddress: "[office address], Karachi, Pakistan",
-  founderName: "[Founder name]",
-  contactName: "[name]",
-  contactEmail: "pilot@swypejobs.app",
-  whatsapp: "[WhatsApp number]",
+  companyLegalName: "Swype Jobs",
+  founderName: "Shozab Jawwad",
+  contactName: "Shozab Jawwad",
+  contactEmail: "hello@swypejobs.app",
   responseTime: "within 24 hours",
-  pilotStart: "[start date]",
-  pilotEnd: "[end date]",
   place: "Karachi, Pakistan",
   confidentialityYears: 3,
   identityRetentionYears: 2,
@@ -21,9 +17,9 @@ export const pilot = {
   interviewMinutes: 45,
   rewards:
     "early access when we launch, a participation certificate, a LinkedIn recommendation from the founders, priority introductions to employers, and swag",
-  /** Show both lawyer options until a choice is confirmed. Set to "A" or "B" after legal review. */
-  breachOption: "both" as "A" | "B" | "both",
-  fixedSumPkr: "[amount]",
+  /** B is the fixed sum. A is proved loss only. */
+  breachOption: "B" as "A" | "B" | "both",
+  fixedSumPkr: "150,000",
   disputeOption: "both" as "A" | "B" | "both",
   /** Flip to true after the lawyer signs off, to hide the draft banner. */
   documentsFinal: false,
@@ -31,3 +27,15 @@ export const pilot = {
   agreementRefPrefix: "SJ-NDA",
   consentRefPrefix: "SJ-CF",
 };
+
+const dateFormat = new Intl.DateTimeFormat("en-GB", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  timeZone: "Asia/Karachi",
+});
+
+export function pilotDates(from = new Date()) {
+  const end = new Date(from.getTime() + (pilot.testingWeeks + 2) * 7 * 24 * 60 * 60 * 1000);
+  return { start: dateFormat.format(from), end: dateFormat.format(end) };
+}

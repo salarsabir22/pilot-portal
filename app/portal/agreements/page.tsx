@@ -177,7 +177,7 @@ export default function AgreementsPage() {
       </p>
       {!pilot.documentsFinal ? (
         <Alert className="mb-4 border-dashed bg-secondary">
-          Draft for lawyer review. Bracketed names, dates, and the choices in clauses 9 and 10 are not final. Ask us to explain any clause in Urdu.
+          Draft for lawyer review. The dispute choice in clause 10 is not final. Ask us to explain any clause in Urdu.
         </Alert>
       ) : null}
       <h2>1. Read the NDA and consent form</h2>
