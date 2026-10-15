@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { pilot } from "@/lib/config";
 import { WEEKS } from "@/lib/types";
+import { TutorialVideo } from "@/components/tutorial-video";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -38,6 +39,13 @@ export default function HomePage() {
           </div>
         </CardContent>
       </Card>
+      <div className="space-y-3">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="m-0 text-lg">How the pilot page works</h2>
+          <p className="text-sm text-muted-foreground">About two minutes.</p>
+        </div>
+        <TutorialVideo />
+      </div>
       <div className="space-y-3">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="m-0 text-lg">Time each week</h2>
