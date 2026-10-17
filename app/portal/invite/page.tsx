@@ -1,14 +1,14 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { api, usePilot } from "@/components/pilot-context";
 
-function InviteForm() {
+export default function InvitePage() {
   const { participant, demo, setParticipant } = usePilot();
   const [code, setCode] = useState("");
   const [email, setEmail] = useState("");
@@ -18,8 +18,6 @@ function InviteForm() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const recruiterTone = searchParams.get("from") === "recruiter" || participant?.audience === "recruiter";
 
   async function openInvite() {
     setBusy(true);
@@ -62,7 +60,10 @@ function InviteForm() {
     return (
       <>
         <h1>Invite accepted</h1>
-        <p className="font-semibold text-primary">You are in as {participant.id}.</p>
+        <p className="font-semibold text-primary">
+          You are in as {participant.id}
+          {participant.audience === "recruiter" ? " (recruiter)" : " (student)"}.
+        </p>
         <Button type="button" onClick={() => router.push(participant.status === "invited" ? "/portal/agreements" : "/portal/access")}>
           Continue
         </Button>
@@ -75,35 +76,23 @@ function InviteForm() {
       <>
         <h1>You are signed in</h1>
         <p className="font-semibold text-primary">{participant.identity?.name} · {participant.id}</p>
-        <Button type="button" onClick={() => router.push("/portal/test")}>Go to the test guide</Button>
+        <Button type="button" onClick={() => router.push("/portal/test")}>
+          Go to the test guide
+        </Button>
       </>
     );
   }
 
   return (
     <>
-      <h1>{recruiterTone ? "Welcome to the recruiter pilot" : "Welcome to the student pilot"}</h1>
+      <h1>Welcome to the swypejobs. pilot</h1>
       <p>
-        {recruiterTone
-          ? "Private hiring-side test. Enter your recruiter invite code. Same portal steps as students; approval creates a recruiter app login."
-          : "Private student test. Enter your invite code. You only see the product after Step 1 is approved."}
-      </p>
-      <p className="text-sm text-muted-foreground">
-        {recruiterTone ? (
-          <>
-            Overview:{" "}
-            <Link href="/recruiters" className="font-semibold text-primary underline-offset-4 hover:underline">
-              /recruiters
-            </Link>
-          </>
-        ) : (
-          <>
-            Hiring instead?{" "}
-            <Link href="/recruiters" className="font-semibold text-primary underline-offset-4 hover:underline">
-              Recruiter pilot
-            </Link>
-          </>
-        )}
+        Enter the invite code we sent you. Student and recruiter codes use the same steps; approval creates the matching
+        app login. Overview:{" "}
+        <Link href="/#audiences" className="font-semibold text-primary underline-offset-4 hover:underline">
+          students & recruiters
+        </Link>
+        .
       </p>
       {needsPassword ? (
         <>
@@ -136,13 +125,5 @@ function InviteForm() {
         </>
       )}
     </>
-  );
-}
-
-export default function InvitePage() {
-  return (
-    <Suspense fallback={<p className="text-sm text-muted-foreground">Loading…</p>}>
-      <InviteForm />
-    </Suspense>
   );
 }

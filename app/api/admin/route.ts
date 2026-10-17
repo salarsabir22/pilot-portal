@@ -122,7 +122,7 @@ export async function POST(request: Request) {
         firstName: person.identity?.name.split(" ")[0] || "there",
         email,
         password,
-        portalLink: role === "recruiter" ? `${origin}/recruiters` : `${origin}/`,
+        portalLink: `${origin}/`,
         inviteLink: `${origin}/portal/invite`,
         appLink: appLogin,
         inviteCode: person.inviteCode,

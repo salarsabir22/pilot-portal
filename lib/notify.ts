@@ -56,7 +56,7 @@ export function credentialsMessage(input: {
     roleLine,
     "Sign in, then finish the short profile if it asks. Use this same password until you change it in the app.",
     "",
-    input.role === "recruiter" ? "Recruiter pilot overview:" : "Student pilot overview:",
+    "Pilot overview:",
     input.portalLink,
     "",
     "Pilot portal (guide, pulse, and feedback):",
