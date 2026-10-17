@@ -15,7 +15,7 @@ const weeklyTime = [
 const flow = [
   ["0. Invite", "Open the private link or enter the code we sent you."],
   ["1. Agreements", "Read and sign the NDA and consent form. We approve within 24 hours."],
-  ["2. Access", "Get a personal login for your role, read the rules, and set your password."],
+  ["2. Access", "Get a personal login for your role, read the rules, and confirm to start."],
   ["3. Test", "Follow the weekly missions for your audience. Up to 5 hours a week."],
   ["4. Feedback", "Weekly pulse, bug reports, and the longer questionnaire."],
 ];

@@ -1,4 +1,4 @@
-import { hashPassword, verifyPassword } from "@/lib/crypto";
+import { verifyPassword } from "@/lib/crypto";
 import { clientIp, currentParticipantId, setParticipantCookie, toPublic } from "@/lib/session";
 import { readDb, updateDb } from "@/lib/store";
 
@@ -8,7 +8,6 @@ export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as {
     action?: "activate" | "login";
     rules?: boolean;
-    newPassword?: string;
     email?: string;
     password?: string;
   } | null;
@@ -31,8 +30,6 @@ export async function POST(request: Request) {
   const id = currentParticipantId();
   if (!id) return Response.json({ error: "Open your invite first." }, { status: 401 });
   if (!body?.rules) return Response.json({ error: "Confirm you have read the rules." }, { status: 400 });
-  const password = body.newPassword ?? "";
-  if (password.length < 8) return Response.json({ error: "Use a new password with at least 8 characters." }, { status: 400 });
 
   const result = await updateDb((db) => {
     const participant = db.participants.find((item) => item.id === id);
@@ -40,9 +37,11 @@ export async function POST(request: Request) {
     if (participant.status !== "approved") {
       return { error: "Your account is not ready to sign in yet.", status: 400 };
     }
+    if (!participant.passwordHash) {
+      return { error: "Your app credentials are not ready yet. Ask a founder to re-approve.", status: 400 };
+    }
     const now = new Date().toISOString();
-    participant.passwordHash = hashPassword(password);
-    participant.tempPasswordEnc = undefined;
+    // Keep the issued temp password — no portal password change step.
     participant.status = "active";
     participant.firstSignInAt = now;
     participant.logs.push({

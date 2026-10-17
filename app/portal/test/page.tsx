@@ -60,7 +60,14 @@ export default function TestPage() {
           <li key={rule}>{rule}</li>
         ))}
       </ul>
-      <Button className="mt-4" asChild><Link href="/portal/feedback">Go to Step 4: Feedback</Link></Button>
+      <div className="mt-6 flex flex-wrap gap-3">
+        <Button asChild>
+          <Link href="/portal/feedback">Next: Feedback</Link>
+        </Button>
+        <Button variant="outline" asChild>
+          <Link href="/portal/access">Back to access</Link>
+        </Button>
+      </div>
     </>
   );
 }

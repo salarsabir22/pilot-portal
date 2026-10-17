@@ -65,7 +65,7 @@ export default function InvitePage() {
           {participant.audience === "recruiter" ? " (recruiter)" : " (student)"}.
         </p>
         <Button type="button" onClick={() => router.push(participant.status === "invited" ? "/portal/agreements" : "/portal/access")}>
-          Continue
+          {participant.status === "invited" ? "Next: Agreements" : "Next: Access"}
         </Button>
       </>
     );
@@ -76,9 +76,14 @@ export default function InvitePage() {
       <>
         <h1>You are signed in</h1>
         <p className="font-semibold text-primary">{participant.identity?.name} · {participant.id}</p>
-        <Button type="button" onClick={() => router.push("/portal/test")}>
-          Go to the test guide
-        </Button>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Button type="button" onClick={() => router.push("/portal/test")}>
+            Next: Test guide
+          </Button>
+          <Button variant="outline" type="button" onClick={() => router.push("/portal/feedback")}>
+            Skip to feedback
+          </Button>
+        </div>
       </>
     );
   }

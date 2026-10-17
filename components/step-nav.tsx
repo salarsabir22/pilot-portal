@@ -36,23 +36,28 @@ export function StepNav() {
 
   return (
     <nav aria-label="Pilot steps">
-      <ol className="flex gap-3 overflow-x-auto pb-1 md:flex-col md:pb-0">
+      <ol className="flex gap-4 overflow-x-auto pb-2 md:flex-col md:gap-4 md:pb-0">
         {STEPS.map((step) => {
           const open = unlocked(step.id);
           const current = pathname === step.href || (step.id === "feedback" && pathname.startsWith("/portal/feedback"));
           return (
-            <li key={step.id}>
+            <li key={step.id} className="shrink-0">
               <Link
                 href={open ? step.href : "#"}
                 aria-current={current ? "step" : undefined}
                 aria-disabled={!open}
                 className={cn(
-                  "flex items-center gap-3 whitespace-nowrap rounded-2xl border border-border bg-card px-4 py-3 text-sm",
+                  "flex items-center gap-3 whitespace-nowrap rounded-2xl border border-border bg-card px-4 py-3.5 text-sm",
                   current && "border-primary font-semibold shadow-[inset_3px_0_0_var(--primary)]",
                   !open && "pointer-events-none opacity-50",
                 )}
               >
-                <span className={cn("grid h-5 w-5 place-items-center rounded-full border text-[11px]", done(step.id) && "border-primary bg-primary text-primary-foreground")}>
+                <span
+                  className={cn(
+                    "grid h-5 w-5 shrink-0 place-items-center rounded-full border text-[11px]",
+                    done(step.id) && "border-primary bg-primary text-primary-foreground",
+                  )}
+                >
                   {done(step.id) ? "✓" : ""}
                 </span>
                 {step.label}

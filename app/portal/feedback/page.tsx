@@ -36,7 +36,9 @@ export default function FeedbackHub() {
           <Card key={href} className="flex h-full flex-col p-5">
             <p className="font-semibold">{title}</p>
             <p className="mt-2 flex-1 text-sm text-muted-foreground">{copy}</p>
-            <Button className="mt-4 w-fit" asChild><Link href={href}>Open</Link></Button>
+            <Button className="mt-4 w-fit" asChild>
+              <Link href={href}>Next: {title}</Link>
+            </Button>
           </Card>
         ))}
       </div>

@@ -171,7 +171,7 @@ export default function AgreementsPage() {
         <div className="mt-4 flex flex-wrap gap-2">
           <Button asChild><Link href="/portal/record">View the signed record</Link></Button>
           {participant.status === "approved" || participant.status === "active" ? (
-            <Button variant="outline" asChild><Link href="/portal/access">Go to Step 2</Link></Button>
+            <Button variant="outline" asChild><Link href="/portal/access">Next: Access</Link></Button>
           ) : null}
         </div>
       </>
