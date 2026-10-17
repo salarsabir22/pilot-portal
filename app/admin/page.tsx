@@ -1,13 +1,23 @@
 "use client";
 
 import { Fragment, useEffect, useState } from "react";
+import { Check, ChevronDown, Loader2, MoreHorizontal } from "lucide-react";
 import { api } from "@/components/pilot-context";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 type Row = {
@@ -39,6 +49,8 @@ export default function AdminPage() {
   const [issued, setIssued] = useState("");
   const [open, setOpen] = useState<string | null>(null);
   const [leaving, setLeaving] = useState(false);
+  const [loggingIn, setLoggingIn] = useState(false);
+  const [busyKey, setBusyKey] = useState<string | null>(null);
 
   async function load() {
     const data = await api<{ participants: Row[]; invites: typeof invites; delivery?: { email: boolean } }>("/api/admin");
@@ -53,12 +65,16 @@ export default function AdminPage() {
   }, []);
 
   async function login() {
+    if (loggingIn) return;
+    setLoggingIn(true);
     setError("");
     try {
       await api("/api/admin", { action: "login", password });
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not sign in.");
+    } finally {
+      setLoggingIn(false);
     }
   }
 
@@ -76,6 +92,9 @@ export default function AdminPage() {
   }
 
   async function act(action: string, id?: string, extra?: Record<string, string>) {
+    const key = id ? `${action}:${id}` : action;
+    if (busyKey) return;
+    setBusyKey(key);
     setError("");
     try {
       const data = await api<{ tempPassword?: string; emailed?: boolean; email?: string; code?: string; appLogin?: string }>("/api/admin", {
@@ -92,7 +111,14 @@ export default function AdminPage() {
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : "That action failed.");
+    } finally {
+      setBusyKey(null);
     }
+  }
+
+  function isBusy(action: string, id?: string) {
+    const key = id ? `${action}:${id}` : action;
+    return busyKey === key;
   }
 
   if (!authed) {
@@ -107,7 +133,15 @@ export default function AdminPage() {
             <Label htmlFor="password">Founder password</Label>
             <Input id="password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
             <p className="text-sm text-destructive">{error}</p>
-            <Button type="button" onClick={login}>Open</Button>
+            <Button type="button" disabled={loggingIn} onClick={login}>
+              {loggingIn ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" /> Opening…
+                </>
+              ) : (
+                "Open"
+              )}
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -129,9 +163,19 @@ export default function AdminPage() {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-2">
           <h1>Founder view</h1>
-          <p className="text-sm text-muted-foreground">{rows.length} participants · {signed} waiting for approval · {active} signed in</p>
+          <p className="text-sm text-muted-foreground">
+            {rows.length} participants · {signed} waiting for approval · {active} signed in
+          </p>
         </div>
-        <Button variant="outline" type="button" disabled={leaving} onClick={logout}>{leaving ? "Signing out…" : "Sign out"}</Button>
+        <Button variant="outline" type="button" disabled={leaving || !!busyKey} onClick={logout}>
+          {leaving ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" /> Signing out…
+            </>
+          ) : (
+            "Sign out"
+          )}
+        </Button>
       </div>
       {delivery.email ? (
         <Alert>Verification email is configured. Codes are emailed and are not shown on screen.</Alert>
@@ -152,17 +196,17 @@ export default function AdminPage() {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
             <div className="space-y-2">
               <Label htmlFor="audience">Audience</Label>
-              <select
-                id="audience"
-                className="flex h-10 w-full min-w-[10rem] rounded-md border border-input bg-background px-3 text-sm"
-                value={audience}
-                onChange={(event) => setAudience(event.target.value as "student" | "recruiter")}
-              >
-                <option value="student">Student</option>
-                <option value="recruiter">Recruiter</option>
-              </select>
+              <Select value={audience} onValueChange={(value) => setAudience(value as "student" | "recruiter")}>
+                <SelectTrigger id="audience" className="min-w-[10rem]">
+                  <SelectValue placeholder="Audience" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="student">Student</SelectItem>
+                  <SelectItem value="recruiter">Recruiter</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0 flex-1 space-y-2">
               <Label htmlFor="note">Note</Label>
               <Input
                 id="note"
@@ -171,7 +215,19 @@ export default function AdminPage() {
                 placeholder={audience === "recruiter" ? "Acme Corp, hiring lead" : "LUMS, batch A"}
               />
             </div>
-            <Button type="button" onClick={() => act("create-invite", undefined, { note, audience })}>Create code</Button>
+            <Button
+              type="button"
+              disabled={!!busyKey}
+              onClick={() => act("create-invite", undefined, { note, audience })}
+            >
+              {isBusy("create-invite") ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" /> Creating…
+                </>
+              ) : (
+                "Create code"
+              )}
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -197,7 +253,15 @@ export default function AdminPage() {
               <p className="font-semibold">Demo student</p>
               <p className="text-sm text-muted-foreground">Resets SJ-DEMO / SJ-P-001.</p>
             </div>
-            <Button variant="outline" type="button" onClick={() => act("reset-demo")}>Reset</Button>
+            <Button variant="outline" type="button" disabled={!!busyKey} onClick={() => act("reset-demo")}>
+              {isBusy("reset-demo") ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" /> Resetting…
+                </>
+              ) : (
+                "Reset"
+              )}
+            </Button>
           </CardContent>
         </Card>
         <Card>
@@ -206,7 +270,15 @@ export default function AdminPage() {
               <p className="font-semibold">Demo recruiter</p>
               <p className="text-sm text-muted-foreground">Resets SJ-R-DEMO / SJ-P-002.</p>
             </div>
-            <Button variant="outline" type="button" onClick={() => act("reset-demo-recruiter")}>Reset</Button>
+            <Button variant="outline" type="button" disabled={!!busyKey} onClick={() => act("reset-demo-recruiter")}>
+              {isBusy("reset-demo-recruiter") ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" /> Resetting…
+                </>
+              ) : (
+                "Reset"
+              )}
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -224,8 +296,12 @@ export default function AdminPage() {
         <TableBody>
           {invites.map((invite) => (
             <TableRow key={invite.code}>
-              <TableCell><code>{invite.code}</code></TableCell>
-              <TableCell><Badge>{invite.audience || "student"}</Badge></TableCell>
+              <TableCell>
+                <code>{invite.code}</code>
+              </TableCell>
+              <TableCell>
+                <Badge>{invite.audience || "student"}</Badge>
+              </TableCell>
               <TableCell>{invite.participantId || "Unused"}</TableCell>
               <TableCell>{invite.note}</TableCell>
             </TableRow>
@@ -241,61 +317,160 @@ export default function AdminPage() {
             <TableHead>Status</TableHead>
             <TableHead className="text-right">Pulses</TableHead>
             <TableHead className="text-right">Bugs</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {rows.map((row) => (
-            <Fragment key={row.id}>
-              <TableRow>
-                <TableCell>
-                  <div className="font-medium">{row.identity?.name || "Not signed"}</div>
-                  <div className="text-muted-foreground">{row.id} · {row.inviteCode} · {row.audience || "student"}</div>
-                </TableCell>
-                <TableCell><Badge>{row.status}</Badge></TableCell>
-                <TableCell className="text-right tabular-nums">{row.pulses.length}/4</TableCell>
-                <TableCell className="text-right tabular-nums">{row.bugs.length}</TableCell>
-                <TableCell>
-                  <div className="flex flex-wrap gap-2">
-                    {row.status === "signed" ? <Button size="sm" type="button" onClick={() => act("approve", row.id)}>Approve</Button> : null}
-                    {row.status !== "revoked" && row.status !== "invited" ? <Button size="sm" variant="outline" type="button" onClick={() => act("revoke", row.id)}>Revoke</Button> : null}
-                    <Button size="sm" variant="outline" type="button" onClick={() => setOpen(open === row.id ? null : row.id)}>Details</Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-              {open === row.id && row.identity ? (
+          {rows.map((row) => {
+            const rowBusy = busyKey?.endsWith(`:${row.id}`) ?? false;
+            const detailsOpen = open === row.id;
+            return (
+              <Fragment key={row.id}>
                 <TableRow>
-                  <TableCell colSpan={5} className="bg-muted/50">
-                    <div className="space-y-2">
-                      <p>CNIC: <b>{row.cnic}</b></p>
-                      <p>{row.identity.uni} · {row.identity.sid} · {row.identity.dob}</p>
-                      <p>{row.identity.mobile}<br />{row.identity.pemail}<br />{row.identity.uemail}</p>
-                      <p className="text-muted-foreground">
-                        Questionnaires {row.questionnaires.map((item) => `${item.mode}:${item.status}`).join(", ") || "none"}
-                        {row.join ? ` · Join: ${row.join.interest}` : ""}
-                      </p>
-                      {row.audit ? <p className="text-muted-foreground">Signed {row.audit.signedAt} from {row.audit.ip}. {row.audit.documentVersion}. Name mismatch: {row.audit.nameMismatch ? "yes" : "no"}.</p> : null}
-                      {row.tempPassword ? <p>Temporary password: <code className="font-bold">{row.tempPassword}</code> {row.credentialsEmailed ? "(emailed)" : ""}</p> : null}
-                      {row.pulses.map((pulse) => (
-                        <p key={pulse.week}>Week {pulse.week}: {pulse.disappointed}. Fix first: {pulse.fixFirst}</p>
-                      ))}
-                      {row.bugs.map((bug) => (
-                        <p key={bug.submittedAt}>Bug on {bug.screen}: {bug.actual}</p>
-                      ))}
-                      {row.join ? <p>Join note: {row.join.why} · {row.join.hours}</p> : null}
+                  <TableCell>
+                    <div className="font-medium">{row.identity?.name || "Not signed"}</div>
+                    <div className="text-muted-foreground">
+                      {row.id} · {row.inviteCode} · {row.audience || "student"}
                     </div>
                   </TableCell>
+                  <TableCell>
+                    <Badge>{row.status}</Badge>
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums">{row.pulses.length}/4</TableCell>
+                  <TableCell className="text-right tabular-nums">{row.bugs.length}</TableCell>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button size="sm" variant="outline" type="button" disabled={rowBusy || !!busyKey}>
+                          {rowBusy ? (
+                            <>
+                              <Loader2 className="h-4 w-4 animate-spin" /> Working…
+                            </>
+                          ) : (
+                            <>
+                              Actions
+                              <ChevronDown className="h-4 w-4 opacity-60" />
+                            </>
+                          )}
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Participant</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          disabled={rowBusy}
+                          onSelect={() => setOpen(detailsOpen ? null : row.id)}
+                        >
+                          {detailsOpen ? (
+                            <>
+                              <Check className="h-4 w-4" /> Hide details
+                            </>
+                          ) : (
+                            <>
+                              <MoreHorizontal className="h-4 w-4" /> Details
+                            </>
+                          )}
+                        </DropdownMenuItem>
+                        {row.status === "signed" ? (
+                          <DropdownMenuItem
+                            disabled={rowBusy || !!busyKey}
+                            onSelect={() => void act("approve", row.id)}
+                          >
+                            {isBusy("approve", row.id) ? (
+                              <>
+                                <Loader2 className="h-4 w-4 animate-spin" /> Approving…
+                              </>
+                            ) : (
+                              "Approve"
+                            )}
+                          </DropdownMenuItem>
+                        ) : null}
+                        {row.status !== "revoked" && row.status !== "invited" ? (
+                          <DropdownMenuItem
+                            disabled={rowBusy || !!busyKey}
+                            className="text-destructive focus:text-destructive"
+                            onSelect={() => void act("revoke", row.id)}
+                          >
+                            {isBusy("revoke", row.id) ? (
+                              <>
+                                <Loader2 className="h-4 w-4 animate-spin" /> Revoking…
+                              </>
+                            ) : (
+                              "Revoke"
+                            )}
+                          </DropdownMenuItem>
+                        ) : null}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
                 </TableRow>
-              ) : null}
-            </Fragment>
-          ))}
+                {detailsOpen && row.identity ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="bg-muted/50">
+                      <div className="space-y-2">
+                        <p>
+                          CNIC: <b>{row.cnic}</b>
+                        </p>
+                        <p>
+                          {row.identity.uni} · {row.identity.sid} · {row.identity.dob}
+                        </p>
+                        <p>
+                          {row.identity.mobile}
+                          <br />
+                          {row.identity.pemail}
+                          <br />
+                          {row.identity.uemail}
+                        </p>
+                        <p className="text-muted-foreground">
+                          Questionnaires {row.questionnaires.map((item) => `${item.mode}:${item.status}`).join(", ") || "none"}
+                          {row.join ? ` · Join: ${row.join.interest}` : ""}
+                        </p>
+                        {row.audit ? (
+                          <p className="text-muted-foreground">
+                            Signed {row.audit.signedAt} from {row.audit.ip}. {row.audit.documentVersion}. Name mismatch:{" "}
+                            {row.audit.nameMismatch ? "yes" : "no"}.
+                          </p>
+                        ) : null}
+                        {row.tempPassword ? (
+                          <p>
+                            Temporary password: <code className="font-bold">{row.tempPassword}</code>{" "}
+                            {row.credentialsEmailed ? "(emailed)" : ""}
+                          </p>
+                        ) : null}
+                        {row.pulses.map((pulse) => (
+                          <p key={pulse.week}>
+                            Week {pulse.week}: {pulse.disappointed}. Fix first: {pulse.fixFirst}
+                          </p>
+                        ))}
+                        {row.bugs.map((bug) => (
+                          <p key={bug.submittedAt}>
+                            Bug on {bug.screen}: {bug.actual}
+                          </p>
+                        ))}
+                        {row.join ? (
+                          <p>
+                            Join note: {row.join.why} · {row.join.hours}
+                          </p>
+                        ) : null}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : null}
+              </Fragment>
+            );
+          })}
         </TableBody>
       </Table>
 
       <Card>
-        <CardHeader><CardTitle>Interview guide (45 minutes)</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle>Interview guide (45 minutes)</CardTitle>
+        </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">Tell them you will take notes, that recording needs the consent they already gave, and that you want the honest version. Ask open questions. Do not defend the product.</p>
+          <p className="text-sm text-muted-foreground">
+            Tell them you will take notes, that recording needs the consent they already gave, and that you want the honest
+            version. Ask open questions. Do not defend the product.
+          </p>
           <Table>
             <TableHeader>
               <TableRow>
@@ -304,11 +479,28 @@ export default function AdminPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow><TableCell className="whitespace-nowrap font-medium">0 to 5 min</TableCell><TableCell>Warm-up. “Tell me about your job search so far.”</TableCell></TableRow>
-              <TableRow><TableCell className="whitespace-nowrap font-medium">5 to 20 min</TableCell><TableCell>Their story. Pick two or three questionnaire answers and ask what happened last time.</TableCell></TableRow>
-              <TableRow><TableCell className="whitespace-nowrap font-medium">20 to 35 min</TableCell><TableCell>Walk-through. Ask how they would find and act on a job today. Do not guide them.</TableCell></TableRow>
-              <TableRow><TableCell className="whitespace-nowrap font-medium">35 to 42 min</TableCell><TableCell>“If we could only build one thing next, what should it be, and what would you give up for it?”</TableCell></TableRow>
-              <TableRow><TableCell className="whitespace-nowrap font-medium">42 to 45 min</TableCell><TableCell>Ask who else you should talk to. Thank them. Reply to every yes or maybe within a week.</TableCell></TableRow>
+              <TableRow>
+                <TableCell className="whitespace-nowrap font-medium">0 to 5 min</TableCell>
+                <TableCell>Warm-up. “Tell me about your job search so far.”</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="whitespace-nowrap font-medium">5 to 20 min</TableCell>
+                <TableCell>Their story. Pick two or three questionnaire answers and ask what happened last time.</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="whitespace-nowrap font-medium">20 to 35 min</TableCell>
+                <TableCell>Walk-through. Ask how they would find and act on a job today. Do not guide them.</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="whitespace-nowrap font-medium">35 to 42 min</TableCell>
+                <TableCell>
+                  “If we could only build one thing next, what should it be, and what would you give up for it?”
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="whitespace-nowrap font-medium">42 to 45 min</TableCell>
+                <TableCell>Ask who else you should talk to. Thank them. Reply to every yes or maybe within a week.</TableCell>
+              </TableRow>
             </TableBody>
           </Table>
         </CardContent>
