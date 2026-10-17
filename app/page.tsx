@@ -26,9 +26,12 @@ export default function HomePage() {
       <Card>
         <CardContent className="grid items-center gap-8 p-8 sm:p-10 lg:grid-cols-2 lg:gap-12 lg:p-12">
           <div className="space-y-6">
-            <p className="text-xs font-bold uppercase tracking-wide text-primary">Private · 25 students · not public</p>
-            <h1 className="text-4xl sm:text-5xl">Welcome to the swypejobs. pilot</h1>
-            <Button asChild><Link href="/portal/invite">Open my invite</Link></Button>
+            <p className="text-xs font-bold uppercase tracking-wide text-primary">Private · students · not public</p>
+            <h1 className="text-4xl sm:text-5xl">swypejobs. student pilot</h1>
+            <div className="flex flex-wrap gap-3">
+              <Button asChild><Link href="/portal/invite">Open my invite</Link></Button>
+              <Button variant="outline" asChild><Link href="/recruiters">Recruiter pilot</Link></Button>
+            </div>
           </div>
           <div className="space-y-4 text-[15px] leading-relaxed text-muted-foreground">
             <p>
@@ -36,6 +39,13 @@ export default function HomePage() {
               and help us decide what to build next. You only see the product after Step 1 is signed and a founder has approved you.
             </p>
             <p>It takes up to {pilot.weeklyHours} hours a week for {pilot.testingWeeks} weeks. You can spread that time however you like.</p>
+            <p className="text-sm">
+              Hiring for a company? Use the{" "}
+              <Link href="/recruiters" className="font-semibold text-primary underline-offset-4 hover:underline">
+                recruiter pilot page
+              </Link>
+              .
+            </p>
           </div>
         </CardContent>
       </Card>

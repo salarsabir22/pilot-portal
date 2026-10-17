@@ -34,6 +34,7 @@ export function credentialsMessage(input: {
   email: string;
   password: string;
   portalLink: string;
+  inviteLink?: string;
   appLink: string;
   inviteCode: string;
   role?: "student" | "recruiter";
@@ -42,6 +43,7 @@ export function credentialsMessage(input: {
     input.role === "recruiter"
       ? "This login is a recruiter account. After sign-in you should land on company / jobs setup, not the student Discover flow."
       : "This login is a student account. After sign-in you should land on Discover / student profile setup.";
+  const inviteLink = input.inviteLink || `${input.portalLink.replace(/\/$/, "")}/portal/invite`;
   return [
     `Hi ${input.firstName},`,
     "",
@@ -54,8 +56,11 @@ export function credentialsMessage(input: {
     roleLine,
     "Sign in, then finish the short profile if it asks. Use this same password until you change it in the app.",
     "",
-    "The pilot portal (your guide, pulse, and feedback):",
+    input.role === "recruiter" ? "Recruiter pilot overview:" : "Student pilot overview:",
     input.portalLink,
+    "",
+    "Pilot portal (guide, pulse, and feedback):",
+    inviteLink,
     `Invite code: ${input.inviteCode}`,
     "Use the same email. You will set a separate password for the portal.",
     "",
