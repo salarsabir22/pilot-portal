@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from "fs";
 import path from "path";
-import type { Database, Participant } from "./types";
+import type { Database, Participant, PilotAudience } from "./types";
 
 const bucket = "pilot-portal";
 const objectPath = "state.json";
@@ -9,6 +9,18 @@ function seed(): Database {
   const demo: Participant = {
     id: "SJ-P-001",
     inviteCode: "SJ-DEMO",
+    audience: "student",
+    status: "invited",
+    createdAt: new Date().toISOString(),
+    logs: [],
+    pulses: [],
+    bugs: [],
+    questionnaires: [],
+  };
+  const demoRecruiter: Participant = {
+    id: "SJ-P-002",
+    inviteCode: "SJ-R-DEMO",
+    audience: "recruiter",
     status: "invited",
     createdAt: new Date().toISOString(),
     logs: [],
@@ -17,13 +29,14 @@ function seed(): Database {
     questionnaires: [],
   };
   return {
-    nextNumber: 4,
+    nextNumber: 5,
     invites: [
-      { code: "SJ-DEMO", reusable: true, participantId: "SJ-P-001", note: "Demo student" },
-      { code: "SJ-INVITE-02", reusable: false, participantId: null, note: "Spare invite" },
-      { code: "SJ-INVITE-03", reusable: false, participantId: null, note: "Spare invite" },
+      { code: "SJ-DEMO", reusable: true, participantId: "SJ-P-001", note: "Demo student", audience: "student" },
+      { code: "SJ-R-DEMO", reusable: true, participantId: "SJ-P-002", note: "Demo recruiter", audience: "recruiter" },
+      { code: "SJ-INVITE-02", reusable: false, participantId: null, note: "Spare student invite", audience: "student" },
+      { code: "SJ-INVITE-03", reusable: false, participantId: null, note: "Spare student invite", audience: "student" },
     ],
-    participants: [demo],
+    participants: [demo, demoRecruiter],
   };
 }
 
@@ -117,10 +130,11 @@ export function readDb() {
   return readRemote();
 }
 
-export function blankParticipant(id: string, code: string): Participant {
+export function blankParticipant(id: string, code: string, audience: PilotAudience = "student"): Participant {
   return {
     id,
     inviteCode: code,
+    audience,
     status: "invited",
     createdAt: new Date().toISOString(),
     logs: [],

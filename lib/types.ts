@@ -1,5 +1,8 @@
 export type PilotStatus = "invited" | "signed" | "approved" | "active" | "revoked";
 
+/** Who this pilot invite is for. App login role matches this. */
+export type PilotAudience = "student" | "recruiter";
+
 export type Identity = {
   name: string;
   father: string;
@@ -99,6 +102,8 @@ export type JoinInterest = {
 export type Participant = {
   id: string;
   inviteCode: string;
+  /** Defaults to student for older records. */
+  audience?: PilotAudience;
   status: PilotStatus;
   createdAt: string;
   identity?: Identity;
@@ -125,6 +130,8 @@ export type Invite = {
   reusable: boolean;
   participantId: string | null;
   note: string;
+  /** Defaults to student for older invites. */
+  audience?: PilotAudience;
 };
 
 export type Database = {
@@ -137,6 +144,7 @@ export type PublicParticipant = {
   id: string;
   status: PilotStatus;
   inviteCode: string;
+  audience: PilotAudience;
   identity: Identity | null;
   cnicMasked: string | null;
   consents: Consents | null;
@@ -164,6 +172,34 @@ export const IDENTITY_FIELDS: { key: keyof Identity; label: string }[] = [
   { key: "res", label: "Current residential address (optional)" },
   { key: "ref", label: "Reference contact (optional)" },
 ];
+
+const RECRUITER_IDENTITY_LABELS: Partial<Record<keyof Identity, string>> = {
+  father: "Father’s / husband’s name (optional)",
+  uemail: "Work email (optional)",
+  uni: "Company name",
+  prog: "Your role / title (optional)",
+  sid: "Employee ID (optional)",
+  ref: "Colleague or HR contact (optional)",
+};
+
+export function audienceOf(value?: PilotAudience | null): PilotAudience {
+  return value === "recruiter" ? "recruiter" : "student";
+}
+
+export function identityFieldsFor(audience?: PilotAudience | null) {
+  const kind = audienceOf(audience);
+  if (kind === "student") return IDENTITY_FIELDS;
+  return IDENTITY_FIELDS.map((field) => ({
+    ...field,
+    label: RECRUITER_IDENTITY_LABELS[field.key] || field.label,
+  }));
+}
+
+export function adultConfirmLabel(audience?: PilotAudience | null) {
+  return audienceOf(audience) === "recruiter"
+    ? "I am at least 18, authorised to test for my company, and my details are true and complete."
+    : "I am at least 18, currently enrolled, and my details are true and complete.";
+}
 
 export const REQUIRED_CONSENTS = [
   "I have read and understood this form and had the chance to ask questions.",
@@ -222,3 +258,39 @@ export const WEEKS: { week: number; theme: string; missions: string }[] = [
       "Complete the full questionnaire and your interview, including the “would you like to join swypejobs.?” section.",
   },
 ];
+
+export const RECRUITER_WEEKS: { week: number; theme: string; missions: string }[] = [
+  {
+    week: 0,
+    theme: "Onboarding",
+    missions: "Sign Step 1, receive credentials, sign in as a recruiter, and complete your company profile.",
+  },
+  {
+    week: 1,
+    theme: "First impressions",
+    missions:
+      "Finish company setup, post at least one job, open Discover, and note what confuses you about candidates.",
+  },
+  {
+    week: 2,
+    theme: "Pipeline and chats",
+    missions:
+      "Review interested candidates, shortlist or pass, start a conversation on a match, and complete the mid-pilot questions.",
+  },
+  {
+    week: 3,
+    theme: "Stress test",
+    missions:
+      "Use it the way you would when hiring under time pressure, compare it with your current tools, try to break it, and note anything that feels unsafe or untrustworthy.",
+  },
+  {
+    week: 4,
+    theme: "Wrap-up",
+    missions:
+      "Complete the full questionnaire and your interview, including whether you would keep hiring on swypejobs.",
+  },
+];
+
+export function weeksFor(audience?: PilotAudience | null) {
+  return audienceOf(audience) === "recruiter" ? RECRUITER_WEEKS : WEEKS;
+}

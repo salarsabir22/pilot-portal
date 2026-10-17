@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { pilot } from "@/lib/config";
+import { appLoginUrl } from "@/lib/config";
 import { RULES, type PublicParticipant } from "@/lib/types";
 
 export default function AccessPage() {
@@ -59,16 +60,23 @@ export default function AccessPage() {
   }
 
   const first = participant.identity?.name.split(" ")[0] || "there";
+  const isRecruiter = participant.audience === "recruiter";
+  const appEmail = participant.identity?.pemail || participant.identity?.uemail || "";
   return (
     <>
       <h1>Step 2 of 4: Access</h1>
-      <p>You are approved. Welcome to the pilot, {first}. Your login was prepared for the email and mobile you verified.</p>
+      <p>
+        You are approved. Welcome to the {isRecruiter ? "recruiter " : ""}pilot, {first}. Your{" "}
+        {isRecruiter ? "recruiter" : "student"} app login was prepared for the email you verified.
+      </p>
       <div className="rounded-2xl bg-secondary p-4">
-        <b>Credentials</b>
+        <b>App credentials ({isRecruiter ? "recruiter login" : "student login"})</b>
         <p className="my-1.5 text-sm text-muted-foreground">
-          Username: {participant.identity?.uemail}
+          Email: {appEmail}
           <br />
-          Sign-in: this page
+          App sign-in: {appLoginUrl()}
+          <br />
+          Portal sign-in: this page (set password below)
         </p>
         {participant.tempPassword ? (
           <>

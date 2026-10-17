@@ -1,3 +1,10 @@
+export function appLoginUrl() {
+  return (process.env.NEXT_PUBLIC_PILOT_APP_URL || process.env.PILOT_APP_URL || "https://dashboard.swypejobs.app/login").replace(
+    /\/$/,
+    "",
+  );
+}
+
 export const pilot = {
   brand: "swypejobs.",
   companyLegalName: "Swype Jobs",

@@ -1,7 +1,7 @@
 import { isDemo } from "@/lib/env";
 import { blankParticipant, updateDb } from "@/lib/store";
 import { setParticipantCookie, toPublic } from "@/lib/session";
-import type { Participant } from "@/lib/types";
+import { audienceOf, type Participant } from "@/lib/types";
 
 export const runtime = "nodejs";
 
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     }
     const id = `SJ-P-${String(db.nextNumber).padStart(3, "0")}`;
     db.nextNumber += 1;
-    const participant = blankParticipant(id, invite.code);
+    const participant = blankParticipant(id, invite.code, audienceOf(invite.audience));
     db.participants.push(participant);
     invite.participantId = id;
     return { participant };

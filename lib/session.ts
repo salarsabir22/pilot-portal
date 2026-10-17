@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { isDemo } from "./env";
 import { decrypt, maskCnic, signToken, unsignToken } from "./crypto";
 import { readDb } from "./store";
-import type { Participant, PublicParticipant } from "./types";
+import { audienceOf, type Participant, type PublicParticipant } from "./types";
 
 const SESSION = "pilot_session";
 const ADMIN = "pilot_admin";
@@ -77,6 +77,7 @@ export function toPublic(participant: Participant, revealPassword: boolean): Pub
     id: participant.id,
     status: participant.status,
     inviteCode: participant.inviteCode,
+    audience: audienceOf(participant.audience),
     identity: participant.identity ?? null,
     cnicMasked,
     consents: participant.consents ?? null,

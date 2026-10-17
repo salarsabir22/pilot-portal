@@ -36,7 +36,12 @@ export function credentialsMessage(input: {
   portalLink: string;
   appLink: string;
   inviteCode: string;
+  role?: "student" | "recruiter";
 }) {
+  const roleLine =
+    input.role === "recruiter"
+      ? "This login is a recruiter account. After sign-in you should land on company / jobs setup, not the student Discover flow."
+      : "This login is a student account. After sign-in you should land on Discover / student profile setup.";
   return [
     `Hi ${input.firstName},`,
     "",
@@ -46,6 +51,7 @@ export function credentialsMessage(input: {
     input.appLink,
     `Email: ${input.email}`,
     `Temporary password: ${input.password}`,
+    roleLine,
     "Sign in, then finish the short profile if it asks. Use this same password until you change it in the app.",
     "",
     "The pilot portal (your guide, pulse, and feedback):",

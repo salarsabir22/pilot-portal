@@ -1,4 +1,4 @@
-import { IDENTITY_FIELDS, type Identity } from "./types";
+import { IDENTITY_FIELDS, audienceOf, type Identity, type PilotAudience } from "./types";
 
 const emailOk = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
@@ -31,7 +31,12 @@ export function formatCnic(value: string) {
 
 type IdentityResult = { ok: false; error: string } | { ok: true; identity: Identity; cnic: string };
 
-export function validateIdentity(input: Partial<Identity> & { cnic?: string }, adult: boolean): IdentityResult {
+export function validateIdentity(
+  input: Partial<Identity> & { cnic?: string },
+  adult: boolean,
+  audience?: PilotAudience | null,
+): IdentityResult {
+  const kind = audienceOf(audience);
   const identity = {} as Identity;
   for (const field of IDENTITY_FIELDS) {
     identity[field.key] = String(input[field.key] ?? "").trim();
@@ -42,12 +47,27 @@ export function validateIdentity(input: Partial<Identity> & { cnic?: string }, a
   if (!identity.mobile) return { ok: false, error: "Enter a mobile number." };
   if (!emailOk(identity.pemail)) return { ok: false, error: "Enter a valid personal email. The code is sent there." };
   if (identity.uemail && !emailOk(identity.uemail)) {
-    return { ok: false, error: "University email is optional. Leave it blank, or enter a valid address." };
+    return {
+      ok: false,
+      error: kind === "recruiter"
+        ? "Work email is optional. Leave it blank, or enter a valid address."
+        : "University email is optional. Leave it blank, or enter a valid address.",
+    };
+  }
+  if (kind === "recruiter" && !identity.uni) {
+    return { ok: false, error: "Enter your company name." };
   }
   const cnic = formatCnic(String(input.cnic ?? ""));
   if (!cnic) return { ok: false, error: "Enter your CNIC number." };
   if (!/^\d{5}-\d{7}-\d$/.test(cnic)) return { ok: false, error: "Enter a 13-digit CNIC, for example 35202-1234567-1." };
-  if (!adult) return { ok: false, error: "Confirm you are 18 or older, currently enrolled, and that your details are true." };
+  if (!adult) {
+    return {
+      ok: false,
+      error: kind === "recruiter"
+        ? "Confirm you are 18 or older, authorised to test for your company, and that your details are true."
+        : "Confirm you are 18 or older, currently enrolled, and that your details are true.",
+    };
+  }
   return { ok: true, identity, cnic };
 }
 

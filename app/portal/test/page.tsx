@@ -5,7 +5,7 @@ import { useState } from "react";
 import { usePilot } from "@/components/pilot-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { RULES, WEEKS } from "@/lib/types";
+import { RULES, weeksFor } from "@/lib/types";
 
 const weeklyTime = [
   ["3 hours", "Testing sessions"],
@@ -21,13 +21,17 @@ export default function TestPage() {
   if (participant?.status !== "active") {
     return <p>The test guide opens after your first sign-in. <Link href="/portal/access">Go to access</Link></p>;
   }
-  const current = WEEKS[week] ?? WEEKS[1];
+  const weeks = weeksFor(participant.audience);
+  const current = weeks[week] ?? weeks[1];
   return (
     <>
       <h1>Step 3 of 4: Test guide</h1>
-      <p>Up to 5 hours a week. Pick a week to see its missions.</p>
+      <p>
+        Up to 5 hours a week. {participant.audience === "recruiter" ? "Recruiter missions for hiring and pipeline." : "Student missions for Discover and matches."}{" "}
+        Pick a week to see its missions.
+      </p>
       <div className="flex flex-wrap gap-2">
-        {WEEKS.map((item) => (
+        {weeks.map((item) => (
           <Button key={item.week} variant={item.week === week ? "default" : "outline"} size="sm" type="button" aria-pressed={item.week === week} onClick={() => setWeek(item.week)}>
             Week {item.week}
           </Button>

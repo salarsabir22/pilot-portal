@@ -1,3 +1,5 @@
+import { appLoginUrl as loginUrl } from "./config";
+
 function supabaseEnv() {
   const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -6,8 +8,10 @@ function supabaseEnv() {
 }
 
 export function appLoginUrl() {
-  return (process.env.PILOT_APP_URL || "https://dashboard.swypejobs.app/login").replace(/\/$/, "");
+  return loginUrl();
 }
+
+type AppRole = "student" | "recruiter";
 
 type AuthUser = { id?: string; email?: string; user_metadata?: Record<string, unknown> };
 
@@ -33,7 +37,7 @@ function authError(payload: { msg?: string; message?: string; error_description?
   return payload?.msg || payload?.message || payload?.error_description || "Could not create the app account.";
 }
 
-async function upsertProfile(id: string, fullName: string) {
+async function upsertProfile(id: string, fullName: string, role: AppRole) {
   const { url, key } = supabaseEnv();
   await fetch(`${url}/rest/v1/profiles?on_conflict=id`, {
     method: "POST",
@@ -43,13 +47,39 @@ async function upsertProfile(id: string, fullName: string) {
       "Content-Type": "application/json",
       Prefer: "resolution=merge-duplicates",
     },
-    body: JSON.stringify({ id, role: "student", full_name: fullName }),
+    body: JSON.stringify({ id, role, full_name: fullName }),
     cache: "no-store",
   });
 }
 
-export async function ensureStudentAccount(input: { email: string; password: string; fullName: string }) {
-  const metadata = { full_name: input.fullName, role: "student" };
+async function ensureRecruiterProfile(id: string, companyName: string) {
+  const { url, key } = supabaseEnv();
+  await fetch(`${url}/rest/v1/recruiter_profiles?on_conflict=id`, {
+    method: "POST",
+    headers: {
+      apikey: key,
+      Authorization: `Bearer ${key}`,
+      "Content-Type": "application/json",
+      Prefer: "resolution=merge-duplicates",
+    },
+    body: JSON.stringify({
+      id,
+      company_name: companyName || "Pilot company",
+      description: "",
+      hiring_focus: "",
+    }),
+    cache: "no-store",
+  });
+}
+
+export async function ensureAppAccount(input: {
+  email: string;
+  password: string;
+  fullName: string;
+  role: AppRole;
+  companyName?: string;
+}) {
+  const metadata = { full_name: input.fullName, role: input.role };
   const created = await authAdmin("/users", "POST", {
     email: input.email,
     password: input.password,
@@ -74,10 +104,23 @@ export async function ensureStudentAccount(input: { email: string; password: str
   }
 
   if (!userId) return { error: "The app account was created without an id." };
-  await upsertProfile(userId, input.fullName);
+  await upsertProfile(userId, input.fullName, input.role);
+  if (input.role === "recruiter") {
+    await ensureRecruiterProfile(userId, input.companyName || "");
+  }
   return { id: userId };
 }
 
-export async function disableStudentAccount(userId: string) {
+/** @deprecated Prefer ensureAppAccount({ role: "student" }) */
+export async function ensureStudentAccount(input: { email: string; password: string; fullName: string }) {
+  return ensureAppAccount({ ...input, role: "student" });
+}
+
+export async function disableAppAccount(userId: string) {
   await authAdmin(`/users/${userId}`, "PUT", { ban_duration: "876000h" });
+}
+
+/** @deprecated Prefer disableAppAccount */
+export async function disableStudentAccount(userId: string) {
+  return disableAppAccount(userId);
 }

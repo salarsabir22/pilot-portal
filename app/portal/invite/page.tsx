@@ -80,7 +80,7 @@ export default function InvitePage() {
   return (
     <>
       <h1>Welcome to the swypejobs. pilot</h1>
-      <p>A private test of a swipe-based job app for students. It takes up to 5 hours a week for 4 weeks. You only see the product after Step 1 is approved.</p>
+      <p>A private test of the swipe-based hiring product. Student and recruiter invites use the same portal steps; approval creates the matching app login. You only see the product after Step 1 is approved.</p>
       {needsPassword ? (
         <>
           <p>This invite already has a password. Sign in with the email you verified{hint ? ` (${hint})` : ""}.</p>
@@ -99,7 +99,7 @@ export default function InvitePage() {
           <Button className="mt-4" type="button" disabled={busy} onClick={openInvite}>Open my invite</Button>
           {demo ? (
             <p className="mt-3 text-sm text-muted-foreground">
-              Demo code: <code>SJ-DEMO</code>. Spare codes: <code>SJ-INVITE-02</code>, <code>SJ-INVITE-03</code>.
+              Demo student: <code>SJ-DEMO</code>. Demo recruiter: <code>SJ-R-DEMO</code>. Spare: <code>SJ-INVITE-02</code>, <code>SJ-INVITE-03</code>.
             </p>
           ) : null}
         </>

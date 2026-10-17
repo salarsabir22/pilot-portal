@@ -3,7 +3,7 @@ import { isDemo } from "@/lib/env";
 import { encrypt, hashOtp, sha256 } from "@/lib/crypto";
 import { documentPlain } from "@/lib/documents";
 import { clientIp, currentParticipantId, toPublic } from "@/lib/session";
-import { updateDb } from "@/lib/store";
+import { readDb, updateDb } from "@/lib/store";
 import { REQUIRED_CONSENTS, type Consents, type Identity } from "@/lib/types";
 import { namesMatch, validateIdentity } from "@/lib/validate";
 
@@ -22,7 +22,11 @@ export async function POST(request: Request) {
   const id = currentParticipantId();
   if (!id) return Response.json({ error: "Open your invite first." }, { status: 401 });
   const body = (await request.json().catch(() => null)) as Body | null;
-  const checked = validateIdentity(body?.identity ?? {}, !!body?.adult);
+
+  const current = (await readDb()).participants.find((item) => item.id === id);
+  if (!current) return Response.json({ error: "Invite not found." }, { status: 404 });
+
+  const checked = validateIdentity(body?.identity ?? {}, !!body?.adult, current.audience);
   if (!checked.ok) return Response.json({ error: checked.error }, { status: 400 });
 
   const required = body?.consents?.required ?? [];

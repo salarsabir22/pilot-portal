@@ -14,6 +14,7 @@ type Row = {
   id: string;
   status: string;
   inviteCode: string;
+  audience: "student" | "recruiter";
   identity: { name: string; uni: string; sid: string; pemail: string; uemail: string; mobile: string; dob: string } | null;
   cnic: string | null;
   audit: { signedAt: string; documentVersion: string; documentHash: string; ip: string; countersignedAt?: string; nameMismatch: boolean } | null;
@@ -31,9 +32,10 @@ export default function AdminPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [rows, setRows] = useState<Row[]>([]);
-  const [invites, setInvites] = useState<{ code: string; note: string; participantId: string | null }[]>([]);
+  const [invites, setInvites] = useState<{ code: string; note: string; participantId: string | null; audience: "student" | "recruiter" }[]>([]);
   const [delivery, setDelivery] = useState({ email: false });
   const [note, setNote] = useState("");
+  const [audience, setAudience] = useState<"student" | "recruiter">("student");
   const [issued, setIssued] = useState("");
   const [open, setOpen] = useState<string | null>(null);
   const [leaving, setLeaving] = useState(false);
@@ -144,15 +146,32 @@ export default function AdminPage() {
       <Card>
         <CardHeader>
           <CardTitle>New invite</CardTitle>
-          <CardDescription>One-time code. Give it to that student only.</CardDescription>
+          <CardDescription>One-time code. Student invites create a student app login; recruiter invites create a recruiter app login.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+            <div className="space-y-2">
+              <Label htmlFor="audience">Audience</Label>
+              <select
+                id="audience"
+                className="flex h-10 w-full min-w-[10rem] rounded-md border border-input bg-background px-3 text-sm"
+                value={audience}
+                onChange={(event) => setAudience(event.target.value as "student" | "recruiter")}
+              >
+                <option value="student">Student</option>
+                <option value="recruiter">Recruiter</option>
+              </select>
+            </div>
             <div className="min-w-0 flex-1">
               <Label htmlFor="note">Note</Label>
-              <Input id="note" value={note} onChange={(event) => setNote(event.target.value)} placeholder="LUMS, batch A" />
+              <Input
+                id="note"
+                value={note}
+                onChange={(event) => setNote(event.target.value)}
+                placeholder={audience === "recruiter" ? "Acme Corp, hiring lead" : "LUMS, batch A"}
+              />
             </div>
-            <Button type="button" onClick={() => act("create-invite", undefined, { note })}>Create code</Button>
+            <Button type="button" onClick={() => act("create-invite", undefined, { note, audience })}>Create code</Button>
           </div>
         </CardContent>
       </Card>
@@ -171,22 +190,34 @@ export default function AdminPage() {
         </div>
       </div>
 
-      <Card>
-        <CardContent className="flex flex-col gap-4 p-5 pt-5 sm:flex-row sm:items-center sm:justify-between sm:p-6 sm:pt-6">
-          <div className="space-y-1">
-            <p className="font-semibold">Demo student</p>
-            <p className="text-sm text-muted-foreground">Resets SJ-DEMO / SJ-P-001 so you can walk the flow again.</p>
-          </div>
-          <Button variant="outline" type="button" onClick={() => act("reset-demo")}>Reset demo student</Button>
-        </CardContent>
-      </Card>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Card>
+          <CardContent className="flex flex-col gap-4 p-5 pt-5 sm:flex-row sm:items-center sm:justify-between sm:p-6 sm:pt-6">
+            <div className="space-y-1">
+              <p className="font-semibold">Demo student</p>
+              <p className="text-sm text-muted-foreground">Resets SJ-DEMO / SJ-P-001.</p>
+            </div>
+            <Button variant="outline" type="button" onClick={() => act("reset-demo")}>Reset</Button>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="flex flex-col gap-4 p-5 pt-5 sm:flex-row sm:items-center sm:justify-between sm:p-6 sm:pt-6">
+            <div className="space-y-1">
+              <p className="font-semibold">Demo recruiter</p>
+              <p className="text-sm text-muted-foreground">Resets SJ-R-DEMO / SJ-P-002.</p>
+            </div>
+            <Button variant="outline" type="button" onClick={() => act("reset-demo-recruiter")}>Reset</Button>
+          </CardContent>
+        </Card>
+      </div>
 
       <h2>Invites</h2>
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead>Code</TableHead>
-            <TableHead>Student</TableHead>
+            <TableHead>Audience</TableHead>
+            <TableHead>Participant</TableHead>
             <TableHead>Note</TableHead>
           </TableRow>
         </TableHeader>
@@ -194,6 +225,7 @@ export default function AdminPage() {
           {invites.map((invite) => (
             <TableRow key={invite.code}>
               <TableCell><code>{invite.code}</code></TableCell>
+              <TableCell><Badge>{invite.audience || "student"}</Badge></TableCell>
               <TableCell>{invite.participantId || "Unused"}</TableCell>
               <TableCell>{invite.note}</TableCell>
             </TableRow>
@@ -205,7 +237,7 @@ export default function AdminPage() {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Student</TableHead>
+            <TableHead>Participant</TableHead>
             <TableHead>Status</TableHead>
             <TableHead className="text-right">Pulses</TableHead>
             <TableHead className="text-right">Bugs</TableHead>
@@ -218,7 +250,7 @@ export default function AdminPage() {
               <TableRow>
                 <TableCell>
                   <div className="font-medium">{row.identity?.name || "Not signed"}</div>
-                  <div className="text-muted-foreground">{row.id} · {row.inviteCode}</div>
+                  <div className="text-muted-foreground">{row.id} · {row.inviteCode} · {row.audience || "student"}</div>
                 </TableCell>
                 <TableCell><Badge>{row.status}</Badge></TableCell>
                 <TableCell className="text-right tabular-nums">{row.pulses.length}/4</TableCell>

@@ -14,7 +14,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { pilot } from "@/lib/config";
 import { consentBlocks, ndaBlocks } from "@/lib/documents";
 import {
-  IDENTITY_FIELDS,
+  adultConfirmLabel,
+  identityFieldsFor,
   OPTIONAL_CONSENTS,
   REQUIRED_CONSENTS,
   type Identity,
@@ -95,16 +96,18 @@ export default function AgreementsPage() {
     }
   }
 
+  const fields = identityFieldsFor(participant?.audience);
+
   async function sign(acknowledgeMismatch = false) {
     setError("");
-    const checked = validateIdentity({ ...form, cnic: form.cnic }, adult);
+    const checked = validateIdentity({ ...form, cnic: form.cnic }, adult, participant?.audience);
     if (!checked.ok) {
       setError(checked.error);
       return;
     }
     setBusy(true);
     try {
-      const identity = Object.fromEntries(IDENTITY_FIELDS.map((field) => [field.key, form[field.key] || ""])) as Identity;
+      const identity = Object.fromEntries(fields.map((field) => [field.key, form[field.key] || ""])) as Identity;
       const data = await api<{ participant: PublicParticipant }>("/api/sign", {
         identity: { ...identity, cnic: form.cnic },
         adult,
@@ -179,7 +182,9 @@ export default function AgreementsPage() {
     <>
       <h1>Step 1 of 4: Agreements</h1>
       <p>
-        Before we show you anything, we need two things from you. First, a confidentiality agreement, because we are testing something that is not public yet. Second, your consent, so you know exactly what we collect and why. It takes about 10 minutes. Please read carefully and ask us anything.
+        {participant.audience === "recruiter"
+          ? "This is the recruiter pilot. Before we show you the hiring product, we need a confidentiality agreement and your consent. It takes about 10 minutes."
+          : "Before we show you anything, we need two things from you. First, a confidentiality agreement, because we are testing something that is not public yet. Second, your consent, so you know exactly what we collect and why. It takes about 10 minutes. Please read carefully and ask us anything."}
       </p>
       {!pilot.documentsFinal ? (
         <Alert className="mb-4 border-dashed bg-secondary">
@@ -195,7 +200,7 @@ export default function AgreementsPage() {
       <fieldset className="space-y-6" disabled={!scrolled}>
         <h2>2. Your details</h2>
         <div className="grid gap-4 md:grid-cols-2">
-          {IDENTITY_FIELDS.slice(0, 2).map((field) => (
+          {fields.slice(0, 2).map((field) => (
             <Field key={field.key} id={field.key} label={field.label} value={form[field.key] || ""} onChange={(value) => setForm({ ...form, [field.key]: value })} required={field.key === "name"} />
           ))}
           <Field
@@ -208,20 +213,25 @@ export default function AgreementsPage() {
             placeholder="35202-1234567-1"
             required
           />
-          {IDENTITY_FIELDS.slice(2).map((field) => (
+          {fields.slice(2).map((field) => (
             <Field
               key={field.key}
               id={field.key}
               label={field.label}
               value={form[field.key] || ""}
               onChange={(value) => setForm({ ...form, [field.key]: value })}
-              required={field.key === "dob" || field.key === "mobile" || field.key === "pemail"}
+              required={
+                field.key === "dob" ||
+                field.key === "mobile" ||
+                field.key === "pemail" ||
+                (participant.audience === "recruiter" && field.key === "uni")
+              }
             />
           ))}
         </div>
         <Label className="mt-3 flex items-start gap-3 font-normal">
           <Checkbox checked={adult} onCheckedChange={(value) => setAdult(value === true)} className="mt-0.5" />
-          I am at least 18, currently enrolled, and my details are true and complete.
+          {adultConfirmLabel(participant.audience)}
         </Label>
 
         <h2>3. Consent</h2>
