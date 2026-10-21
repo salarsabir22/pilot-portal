@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { PilotProvider } from "@/components/pilot-context";
 
@@ -24,7 +23,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <PilotProvider>
           <Header />
           <div className="flex-1">{children}</div>
-          <Footer />
         </PilotProvider>
       </body>
     </html>
