@@ -1,10 +1,10 @@
-import { pilot } from "@/lib/config";
+import { documentVersionFor } from "@/lib/config";
 import { isDemo } from "@/lib/env";
 import { encrypt, hashOtp, sha256 } from "@/lib/crypto";
 import { documentPlain } from "@/lib/documents";
 import { clientIp, currentParticipantId, toPublic } from "@/lib/session";
 import { readDb, updateDb } from "@/lib/store";
-import { REQUIRED_CONSENTS, type Consents, type Identity } from "@/lib/types";
+import { optionalConsentsFor, requiredConsentsFor, type Consents, type Identity } from "@/lib/types";
 import { namesMatch, validateIdentity } from "@/lib/validate";
 
 export const runtime = "nodejs";
@@ -29,12 +29,14 @@ export async function POST(request: Request) {
   const checked = validateIdentity(body?.identity ?? {}, !!body?.adult, current.audience);
   if (!checked.ok) return Response.json({ error: checked.error }, { status: 400 });
 
+  const requiredLabels = requiredConsentsFor(current.audience);
+  const optionalLabels = optionalConsentsFor(current.audience);
   const required = body?.consents?.required ?? [];
   const optional = body?.consents?.optional ?? [];
-  if (required.length !== REQUIRED_CONSENTS.length || required.some((item) => !item)) {
+  if (required.length !== requiredLabels.length || required.some((item) => !item)) {
     return Response.json({ error: "Tick every required consent box." }, { status: 400 });
   }
-  if (optional.length !== 5 || optional.some((item) => typeof item !== "boolean")) {
+  if (optional.length !== optionalLabels.length || optional.some((item) => typeof item !== "boolean")) {
     return Response.json({ error: "Save each optional consent as yes or no." }, { status: 400 });
   }
 
@@ -75,8 +77,8 @@ export async function POST(request: Request) {
       signedAt: now,
       ip: clientIp(request),
       userAgent: request.headers.get("user-agent") ?? "",
-      documentVersion: pilot.documentVersion,
-      documentHash: sha256(documentPlain(participant.id)),
+      documentVersion: documentVersionFor(participant.audience),
+      documentHash: sha256(documentPlain(participant.id, participant.audience)),
       typedName,
       nameMismatch: mismatch,
       otpConfirmed: true,

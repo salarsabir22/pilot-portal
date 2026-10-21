@@ -24,6 +24,8 @@ export const pilot = {
   interviewMinutes: 45,
   rewards:
     "early access when we launch, a participation certificate, a LinkedIn recommendation from the founders, priority introductions to employers, and swag",
+  recruiterRewards:
+    "early access when we launch hiring tools, a participation certificate, a LinkedIn recommendation from the founders, priority support when you hire on swypejobs., and swag",
   /** B is the fixed sum. A is proved loss only. */
   breachOption: "B" as "A" | "B" | "both",
   fixedSumPkr: "150,000",
@@ -31,9 +33,18 @@ export const pilot = {
   /** Flip to true after the lawyer signs off, to hide the draft banner. */
   documentsFinal: false,
   documentVersion: "NDA v1.0-draft + Consent v1.0-draft",
+  recruiterDocumentVersion: "NDA-R v1.0-draft + Consent-R v1.0-draft",
   agreementRefPrefix: "SJ-NDA",
   consentRefPrefix: "SJ-CF",
 };
+
+export function documentVersionFor(audience?: "student" | "recruiter" | null) {
+  return audience === "recruiter" ? pilot.recruiterDocumentVersion : pilot.documentVersion;
+}
+
+export function rewardsFor(audience?: "student" | "recruiter" | null) {
+  return audience === "recruiter" ? pilot.recruiterRewards : pilot.rewards;
+}
 
 const dateFormat = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",

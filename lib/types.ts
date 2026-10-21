@@ -217,6 +217,30 @@ export const OPTIONAL_CONSENTS = [
   "You may name me publicly as a Pilot participant (name and university only).",
 ];
 
+export const RECRUITER_REQUIRED_CONSENTS = [
+  "I have read and understood this form and had the chance to ask questions.",
+  "I voluntarily agree to take part in the recruiter Pilot on behalf of myself or my company.",
+  "I consent to swypejobs. collecting and using my identity, company, account, usage and feedback data as described in section 4.",
+  "I consent to the monitoring and protection measures in section 5 (watermarking, access logs, capture detection).",
+  "I agree my identity and company details may be used and shared as described in section 5 to enforce the NDA.",
+];
+
+export const RECRUITER_OPTIONAL_CONSENTS = [
+  "You may record the audio or video of my feedback interviews, for internal note-taking only. Recordings are deleted within 90 days.",
+  "You may use short anonymous quotes from my feedback in internal and investor materials.",
+  "You may show my company name and job listings to participating students during the Pilot.",
+  "You may contact me about future hiring tools or opportunities with swypejobs.",
+  "You may name me publicly as a Pilot participant (name and company only).",
+];
+
+export function requiredConsentsFor(audience?: PilotAudience | null) {
+  return audienceOf(audience) === "recruiter" ? RECRUITER_REQUIRED_CONSENTS : REQUIRED_CONSENTS;
+}
+
+export function optionalConsentsFor(audience?: PilotAudience | null) {
+  return audienceOf(audience) === "recruiter" ? RECRUITER_OPTIONAL_CONSENTS : OPTIONAL_CONSENTS;
+}
+
 export const RULES = [
   "Do not take screenshots or screen recordings, or photograph the screen.",
   "Do not share your login or let anyone else use your account.",

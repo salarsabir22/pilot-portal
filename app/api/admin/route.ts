@@ -1,7 +1,8 @@
 import { randomBytes } from "crypto";
+import { serializeParticipant } from "@/lib/admin-serialize";
 import { appLoginUrl, disableAppAccount, ensureAppAccount } from "@/lib/app-account";
 import { pilot } from "@/lib/config";
-import { decrypt, encrypt, hashPassword, safeEqualString, tempPassword } from "@/lib/crypto";
+import { encrypt, hashPassword, safeEqualString, tempPassword } from "@/lib/crypto";
 import { credentialsMessage, deliveryConfigured, sendMail } from "@/lib/notify";
 import { clearAdminCookie, clientIp, isAdmin, setAdminCookie } from "@/lib/session";
 import { blankParticipant, readDb, updateDb } from "@/lib/store";
@@ -19,25 +20,7 @@ export async function GET() {
   if (denied) return denied;
   const db = await readDb();
   return Response.json({
-    participants: db.participants.map((item) => ({
-      id: item.id,
-      status: item.status,
-      inviteCode: item.inviteCode,
-      audience: audienceOf(item.audience),
-      createdAt: item.createdAt,
-      identity: item.identity ?? null,
-      cnic: item.cnicEnc ? decrypt(item.cnicEnc) : null,
-      consents: item.consents ?? null,
-      audit: item.audit ?? null,
-      tempPassword: item.tempPasswordEnc ? decrypt(item.tempPasswordEnc) : null,
-      credentialsEmailed: !!item.credentialsEmailed,
-      firstSignInAt: item.firstSignInAt ?? null,
-      pulses: item.pulses,
-      bugs: item.bugs,
-      questionnaires: item.questionnaires,
-      join: item.join ?? null,
-      logs: item.logs,
-    })),
+    participants: db.participants.map(serializeParticipant),
     invites: db.invites.map((item) => ({
       ...item,
       audience: audienceOf(item.audience),

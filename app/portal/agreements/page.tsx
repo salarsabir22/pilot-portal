@@ -16,8 +16,8 @@ import { consentBlocks, ndaBlocks } from "@/lib/documents";
 import {
   adultConfirmLabel,
   identityFieldsFor,
-  OPTIONAL_CONSENTS,
-  REQUIRED_CONSENTS,
+  optionalConsentsFor,
+  requiredConsentsFor,
   type Identity,
   type PublicParticipant,
 } from "@/lib/types";
@@ -31,15 +31,18 @@ type Draft = {
   required: boolean[];
   optional: boolean[];
   sig: string;
+  audience?: string;
 };
 
 export default function AgreementsPage() {
   const { participant, ready, setParticipant } = usePilot();
+  const requiredLabels = requiredConsentsFor(participant?.audience);
+  const optionalLabels = optionalConsentsFor(participant?.audience);
   const [scrolled, setScrolled] = useState(false);
   const [form, setForm] = useState<Record<string, string>>({ cnic: "" });
   const [adult, setAdult] = useState(false);
-  const [required, setRequired] = useState(() => REQUIRED_CONSENTS.map(() => false));
-  const [optional, setOptional] = useState(() => OPTIONAL_CONSENTS.map(() => false));
+  const [required, setRequired] = useState(() => requiredLabels.map(() => false));
+  const [optional, setOptional] = useState(() => optionalLabels.map(() => false));
   const [sig, setSig] = useState("");
   const [otp, setOtp] = useState("");
   const [otpNote, setOtpNote] = useState("");
@@ -48,24 +51,37 @@ export default function AgreementsPage() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
+    if (!participant?.audience) return;
     const saved = sessionStorage.getItem(draftKey);
-    if (!saved) return;
+    if (!saved) {
+      setRequired(requiredConsentsFor(participant.audience).map(() => false));
+      setOptional(optionalConsentsFor(participant.audience).map(() => false));
+      return;
+    }
     const draft = JSON.parse(saved) as Draft;
+    if (draft.audience && draft.audience !== participant.audience) {
+      setRequired(requiredConsentsFor(participant.audience).map(() => false));
+      setOptional(optionalConsentsFor(participant.audience).map(() => false));
+      return;
+    }
     setForm(draft.form);
     setAdult(draft.adult);
     setRequired(draft.required);
     setOptional(draft.optional);
     setSig(draft.sig);
-  }, []);
+  }, [participant?.audience]);
 
   useEffect(() => {
-    const draft: Draft = { form, adult, required, optional, sig };
+    const draft: Draft = { form, adult, required, optional, sig, audience: participant?.audience };
     sessionStorage.setItem(draftKey, JSON.stringify(draft));
-  }, [form, adult, required, optional, sig]);
+  }, [form, adult, required, optional, sig, participant?.audience]);
 
   const blocks = useMemo(
-    () => [...ndaBlocks(participant?.id || "SJ-P-000"), ...consentBlocks(participant?.id || "SJ-P-000")],
-    [participant?.id],
+    () => [
+      ...ndaBlocks(participant?.id || "SJ-P-000", participant?.audience),
+      ...consentBlocks(participant?.id || "SJ-P-000", participant?.audience),
+    ],
+    [participant?.id, participant?.audience],
   );
 
   function onScroll(event: React.UIEvent<HTMLDivElement>) {
@@ -236,7 +252,7 @@ export default function AgreementsPage() {
 
         <h2>3. Consent</h2>
         <p className="text-sm text-muted-foreground">Required</p>
-        {REQUIRED_CONSENTS.map((label, index) => (
+        {requiredLabels.map((label, index) => (
           <Label className="mt-2 flex items-start gap-3 font-normal" key={label}>
             <Checkbox
               checked={required[index]}
@@ -247,7 +263,7 @@ export default function AgreementsPage() {
           </Label>
         ))}
         <p className="text-sm text-muted-foreground">Optional. You can say no and still take part.</p>
-        {OPTIONAL_CONSENTS.map((label, index) => (
+        {optionalLabels.map((label, index) => (
           <Label className="mt-2 flex items-start gap-3 font-normal" key={label}>
             <Checkbox
               checked={optional[index]}
